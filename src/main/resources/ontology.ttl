@@ -1,0 +1,87 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+
+mw:Page a owl:Class .
+
+mw:RedirectPage a owl:Class ;
+    rdfs:subClassOf mw:Page .
+
+mw:NewPage a owl:Class ;
+    rdfs:subClassOf mw:Page .
+
+mw:Revision a owl:Class .
+
+mw:MinorRevision a owl:Class ;
+    rdfs:subClassOf mw:Revision .
+
+
+# Page properties
+
+mw:pageId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range xsd:integer .
+
+mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range xsd:integer .
+
+mw:pageTitle a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range xsd:string .
+
+mw:pageLatestRevision a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range mw:Revision .
+
+mw:pageContentModelId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range xsd:string .
+
+mw:internalLinkTo a owl:ObjectProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range mw:Page .
+
+mw:includesPage a owl:ObjectProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range mw:Page .
+
+mw:inCategory a owl:ObjectProperty ;
+    rdfs:domain mw:Page ;
+    rdfs:range mw:Page .
+
+# Revision properties
+
+mw:revisionId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:integer .
+
+mw:revisionOfPage a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range mw:Page .
+
+mw:revisionComment a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:string .
+
+mw:revisionUserText a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:string .
+
+mw:revisionLength a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:integer .
+
+mw:parentRevision a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range mw:Revision .
+
+mw:revisionContentModelId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:string .
+
+mw:revisionContentFormatId a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain mw:Revision ;
+    rdfs:range xsd:string .

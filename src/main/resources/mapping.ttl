@@ -1,0 +1,257 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+
+
+# {base_url} is replaced before loading by the wiki base URL like "https://en.wikipedia.org"
+# {lang} is replaced by the wiki language code like "en"
+
+[ # Page: main mapping
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model from page"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/page/{page_id}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_id" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_namespace" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageNamespaceId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_title" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageTitle
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/w/index.php?oldid={page_latest}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:pageLatestRevision
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_content_model" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageContentModelId
+    ]
+] .
+
+[ #Page: redirect
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_id from page WHERE page_is_redirect = 1"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:RedirectPage ;
+        rr:template  "{base_url}/page/{page_id}" ;
+        rr:termType rr:IRI
+    ]
+] .
+
+[ #Page: new
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_id from page WHERE page_is_new = 1"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:NewPage ;
+        rr:template  "{base_url}/page/{page_id}" ;
+        rr:termType rr:IRI
+    ]
+] .
+
+[ # Revision: main mapping
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT rev_id, rev_page, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format from revision"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Revision ;
+        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_id" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/page/{rev_page}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:revisionOfPage
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_comment" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionComment
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_user_text" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionUserText
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_len" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionLength
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_content_model" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionContentModelId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "rev_content_format" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:revisionContentFormatId
+    ]
+] .
+
+[ #Revision: minor
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT rev_id from revision WHERE rev_minor_edit = 1"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:MinorRevision ;
+        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:termType rr:IRI
+    ]
+] .
+
+[ #PageLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT pl_from, page_id from pagelinks, page WHERE page_namespace = pl_namespace AND page_title = pl_title"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/page/{pl_from}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/page/{page_id}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:internalLinkTo
+    ] ;
+] .
+
+[ #TemplateLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT tl_from, page_id from templatelinks, page WHERE page_namespace = tl_namespace AND page_title = tl_title"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/page/{tl_from}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/page/{page_id}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:includesPage
+    ] ;
+] .
+
+[ #CategoryLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT cl_from, page_id from categorylinks, page WHERE page_namespace = 14 AND page_title = cl_to"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/page/{cl_from}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/page/{page_id}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:inCategory
+    ] ;
+] .

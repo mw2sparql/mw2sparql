@@ -1,0 +1,10 @@
+page:page_id
+page:page_namespace,page_title
+page:page_latest:revision:rev_id
+revision:rev_id
+revision:rev_page:page:page_id
+pagelinks:pl_from:page:page_id
+pagelinks:pl_namespace,pl_title:page:page_namespace,page_title
+templatelinks:tl_from:page:page_id
+templatelinks:tl_namespace,tl_title:page:page_namespace,page_title
+categorylinks:cl_from:page:page_id
