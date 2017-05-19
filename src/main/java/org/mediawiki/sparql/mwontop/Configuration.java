@@ -30,8 +30,8 @@ import java.util.Properties;
  */
 public class Configuration {
 
-    private static final Configuration INSTANCE = loadConfiguration();
     private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
+    private static final Configuration INSTANCE = loadConfiguration();
 
     public static Configuration getInstance() {
         return INSTANCE;

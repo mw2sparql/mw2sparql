@@ -161,7 +161,7 @@ public class RepositoryFactory {
         }
     }
 
-    private class MySQLConnectionInformation {
+    private static class MySQLConnectionInformation {
         private String host;
         private String dbName;
         private String user;
@@ -191,7 +191,7 @@ public class RepositoryFactory {
         }
     }
 
-    private class SiteConfig {
+    private static class SiteConfig {
         private String dbName;
         private String lang;
         private String name;
