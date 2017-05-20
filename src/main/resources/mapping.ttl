@@ -2,8 +2,9 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix schema: <http://schema.org/> .
 @prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
 
 
 # {base_url} is replaced before loading by the wiki base URL like "https://en.wikipedia.org"
@@ -47,7 +48,7 @@
             rr:termType rr:Literal ;
             rr:language "{lang}"
         ] ;
-        rr:predicate mw:pageTitle
+        rr:predicate schema:name
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -134,7 +135,7 @@
             rr:column "rev_comment" ;
             rr:termType rr:Literal
         ] ;
-        rr:predicate mw:revisionComment
+        rr:predicate schema:comment
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -143,7 +144,7 @@
             rr:column "rev_user_text" ;
             rr:termType rr:Literal
         ] ;
-        rr:predicate mw:revisionUserText
+        rr:predicate mw:revisionUserName
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -152,7 +153,7 @@
             rr:column "rev_len" ;
             rr:termType rr:Literal
         ] ;
-        rr:predicate mw:revisionLength
+        rr:predicate schema:contentSize
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -170,7 +171,7 @@
             rr:column "rev_content_format" ;
             rr:termType rr:Literal
         ] ;
-        rr:predicate mw:revisionContentFormatId
+        rr:predicate schema:fileFormat
     ]
 ] .
 
