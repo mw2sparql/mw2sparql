@@ -14,7 +14,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model from page"
+        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model FROM {db}.page"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -74,7 +74,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id from page WHERE page_is_redirect = 1"
+        rr:sqlQuery  "SELECT page_id FROM {db}.page WHERE page_is_redirect = 1"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -88,7 +88,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id from page WHERE page_is_new = 1"
+        rr:sqlQuery  "SELECT page_id FROM {db}.page WHERE page_is_new = 1"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -102,7 +102,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, rev_page, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format from revision"
+        rr:sqlQuery  "SELECT rev_id, rev_page, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format FROM {db}.revision"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -179,7 +179,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id from revision WHERE rev_minor_edit = 1"
+        rr:sqlQuery  "SELECT rev_id FROM {db}.revision WHERE rev_minor_edit = 1"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -193,7 +193,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT pl_from, page_id from pagelinks, page WHERE page_namespace = pl_namespace AND page_title = pl_title"
+        rr:sqlQuery  "SELECT pl_from, page_id FROM {db}.pagelinks, page WHERE page_namespace = pl_namespace AND page_title = pl_title"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -216,7 +216,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT tl_from, page_id from templatelinks, page WHERE page_namespace = tl_namespace AND page_title = tl_title"
+        rr:sqlQuery  "SELECT tl_from, page_id FROM {db}.templatelinks, page WHERE page_namespace = tl_namespace AND page_title = tl_title"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -239,7 +239,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT cl_from, page_id from categorylinks, page WHERE page_namespace = 14 AND page_title = cl_to"
+        rr:sqlQuery  "SELECT cl_from, page_id FROM {db}.categorylinks, page WHERE page_namespace = 14 AND page_title = cl_to"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;

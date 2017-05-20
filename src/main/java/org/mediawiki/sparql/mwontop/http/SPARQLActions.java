@@ -18,7 +18,6 @@
 package org.mediawiki.sparql.mwontop.http;
 
 
-import com.google.common.collect.Sets;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
 import org.openrdf.query.*;
 import org.openrdf.query.resultio.BooleanQueryResultWriterFactory;
@@ -38,42 +37,44 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.util.Set;
 
 /**
  * @author Thomas Pellissier Tanon
  */
-@Path("/{siteId}/sparql")
+@Path("/sparql")
 public class SPARQLActions {
 
     private static final int QUERY_TIMOUT_IN_S = 30;
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
-    private static final Set<String> ALLOWED_SITES = Sets.newHashSet("enwiki", "frwiki", "enwikisource", "frwikisource");
+    private static Repository repository;
+
+    static {
+        try {
+            repository = RepositoryFactory.getInstance().getRepository();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
 
     @GET
-    public Response get(@PathParam("siteId") String siteId, @QueryParam("query") String query, @Context Request request) {
-        return executeQuery(siteId, query, null, request);
+    public Response get(@QueryParam("query") String query, @Context Request request) {
+        return executeQuery(query, null, request);
     }
 
     @POST
     @Consumes({"application/x-www-form-urlencoded", "multipart/form-data"})
-    public Response postForm(@FormParam("query") String query, @PathParam("siteId") String siteId, @Context Request request) {
-        return executeQuery(siteId, query, null, request);
+    public Response postForm(@FormParam("query") String query, @Context Request request) {
+        return executeQuery(query, null, request);
     }
 
     @POST
     @Consumes("application/sparql-query")
-    public Response postDirect(String query, @PathParam("siteId") String siteId, @Context Request request) {
-        return executeQuery(siteId, query, null, request);
+    public Response postDirect(String query, @Context Request request) {
+        return executeQuery(query, null, request);
     }
 
-    private Response executeQuery(String siteId, String queryString, String baseIRI, Request request) {
-        if(!ALLOWED_SITES.contains(siteId)) {
-            throw new NotFoundException(siteId + " is not a supported site");
-        }
-
+    private Response executeQuery(String queryString, String baseIRI, Request request) {
         try {
-            Repository repository = RepositoryFactory.getInstance().getRepositoryForSiteId(siteId);
             RepositoryConnection repositoryConnection = repository.getConnection();
             try {
                 Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, queryString);

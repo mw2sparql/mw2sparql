@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
 import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
@@ -61,7 +62,7 @@ public class RepositoryFactory {
     private OWLOntology owlOntology;
     private ImplicitDBConstraintsReader dbConstraints;
     private Map<String,SiteConfig> sitesConfig;
-    private Map<String, Repository> repositories = new HashMap<>();
+    private Repository repository;
 
     private RepositoryFactory() {
         try {
@@ -78,15 +79,12 @@ public class RepositoryFactory {
         return INSTANCE;
     }
 
-    public Repository getRepositoryForSiteId(String siteId) throws Exception {
-        if(!repositories.containsKey(siteId)) {
-            repositories.put(siteId, buildRepositoryForSiteId(siteId));
+    public Repository getRepository() throws Exception {
+        if (repository == null) {
+            String firstSiteId = Configuration.getInstance().getAllowedSites().iterator().next(); //TODO
+            repository = buildVirtualRepository(connectionInformationForSiteId(firstSiteId));
         }
-        return repositories.get(siteId);
-    }
-
-    private Repository buildRepositoryForSiteId(String siteId) throws Exception {
-        return buildVirtualRepository(connectionInformationForSiteId(siteId), sitesConfig.get(siteId));
+        return repository;
     }
 
     private MySQLConnectionInformation connectionInformationForSiteId(String siteId) {
@@ -99,7 +97,7 @@ public class RepositoryFactory {
         );
     }
 
-    private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation, SiteConfig siteConfig) throws Exception {
+    private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation) throws Exception {
         QuestPreferences preferences = new QuestPreferences();
         preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         preferences.setCurrentValueOf(QuestPreferences.DBNAME, connectionInformation.getDatabaseName());
@@ -112,10 +110,15 @@ public class RepositoryFactory {
         preferences.setCurrentValueOf(QuestPreferences.DBUSER, connectionInformation.getUser());
         preferences.setCurrentValueOf(QuestPreferences.DBPASSWORD, connectionInformation.getPassword());
 
+        Model rdfMapping = new LinkedHashModel();
+        for (String siteId : Configuration.getInstance().getAllowedSites()) {
+            rdfMapping.addAll(loadRDFMappingModelForSite(sitesConfig.get(siteId)));
+        }
+
         SesameVirtualRepo repository = new SesameVirtualRepo(
                 connectionInformation.getDatabaseName(),
                 owlOntology,
-                loadRDFMappingModel(siteConfig),
+                rdfMapping,
                 preferences
         );
         repository.setNamespaces(PREFIXES);
@@ -131,10 +134,11 @@ public class RepositoryFactory {
         }
     }
 
-    private Model loadRDFMappingModel(SiteConfig siteConfig) throws Exception {
+    private Model loadRDFMappingModelForSite(SiteConfig siteConfig) throws Exception {
         return InternalFilesManager.parseTurtle(
                 InternalFilesManager.getFileAsString("/mapping.ttl")
                         .replace("{lang}", siteConfig.getLanguageCode())
+                        .replace("{db}", siteConfig.getDatabaseName() + "_p")
                         .replace("{base_url}", siteConfig.getBaseURL().replace("https://", "http://")) //TODO: crazy restriction in ontop 1.18.0.1
         );
     }

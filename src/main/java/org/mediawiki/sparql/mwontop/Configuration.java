@@ -20,10 +20,16 @@ package org.mediawiki.sparql.mwontop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -32,6 +38,11 @@ public class Configuration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
     private static final Configuration INSTANCE = loadConfiguration();
+    private Properties properties;
+
+    private Configuration(Properties properties) {
+        this.properties = properties;
+    }
 
     public static Configuration getInstance() {
         return INSTANCE;
@@ -50,12 +61,6 @@ public class Configuration {
             System.exit(1);
             return null;
         }
-    }
-
-    private Properties properties;
-
-    private Configuration(Properties properties) {
-        this.properties = properties;
     }
 
     public URI getBaseURI() {
@@ -78,5 +83,11 @@ public class Configuration {
 
     public String getDatabasePassword() {
         return properties.getProperty("app.db.password");
+    }
+
+    public Set<String> getAllowedSites() {
+        return Arrays.stream(properties.getProperty("app.db.allowedSites", "enwiki").split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
     }
 }
