@@ -29,8 +29,7 @@ mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty ;
     rdfs:range xsd:integer .
 
 mw:pageTitle a owl:DatatypeProperty, owl:FunctionalProperty ;
-    rdfs:domain mw:Page ;
-    rdfs:range xsd:string .
+    rdfs:domain mw:Page . #rdf:langString is not supported yet by Ontop
 
 mw:pageLatestRevision a owl:ObjectProperty, owl:FunctionalProperty ;
     rdfs:domain mw:Page ;

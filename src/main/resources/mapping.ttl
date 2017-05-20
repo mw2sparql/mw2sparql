@@ -44,7 +44,8 @@
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
             rr:column "page_title" ;
-            rr:termType rr:Literal
+            rr:termType rr:Literal ;
+            rr:language "{lang}"
         ] ;
         rr:predicate mw:pageTitle
     ] ;
