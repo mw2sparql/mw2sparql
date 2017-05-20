@@ -91,7 +91,7 @@ public class RepositoryFactory {
     private MySQLConnectionInformation connectionInformationForSiteId(String siteId) {
         Configuration configuration = Configuration.getInstance();
         return new MySQLConnectionInformation(
-                configuration.getDatabaseHostPattern().replace("{siteId}", siteId),
+                configuration.getDatabaseHost(),
                 siteId + "_p",
                 configuration.getDatabaseUser(),
                 configuration.getDatabasePassword()

@@ -73,8 +73,8 @@ public class Configuration {
         }
     }
 
-    public String getDatabaseHostPattern() {
-        return properties.getProperty("app.db.hostPattern");
+    public String getDatabaseHost() {
+        return properties.getProperty("app.db.host");
     }
 
     public String getDatabaseUser() {
