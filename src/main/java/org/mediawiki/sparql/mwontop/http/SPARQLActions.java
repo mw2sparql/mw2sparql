@@ -50,12 +50,6 @@ public class SPARQLActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
     private static final Set<String> ALLOWED_SITES = Sets.newHashSet("enwiki", "frwiki", "enwikisource", "frwikisource");
 
-    private static final String PREFIX = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-            "PREFIX mw: <http://tools.wmflabs.org/mw2sparql/ontology#>\n";
-
     @GET
     public Response get(@PathParam("siteId") String siteId, @QueryParam("query") String query, @Context Request request) {
         return executeQuery(siteId, query, null, request);
@@ -82,7 +76,7 @@ public class SPARQLActions {
             Repository repository = RepositoryFactory.getInstance().getRepositoryForSiteId(siteId);
             RepositoryConnection repositoryConnection = repository.getConnection();
             try {
-                Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, PREFIX + queryString);
+                Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, queryString);
                 query.setMaxQueryTime(QUERY_TIMOUT_IN_S);
                 if (query instanceof BooleanQuery) {
                     return evaluateBooleanQuery((BooleanQuery) query, request);

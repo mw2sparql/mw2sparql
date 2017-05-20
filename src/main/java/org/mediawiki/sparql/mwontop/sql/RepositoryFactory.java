@@ -25,6 +25,10 @@ import org.apache.commons.io.IOUtils;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
 import org.openrdf.model.Model;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.Repository;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -44,19 +48,24 @@ import java.util.Map;
 public class RepositoryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryFactory.class);
     private static final RepositoryFactory INSTANCE = new RepositoryFactory();
+    private static final Map<String, String> PREFIXES = new HashMap<>();
 
-    public static RepositoryFactory getInstance() {
-        return INSTANCE;
+    static {
+        PREFIXES.put(RDF.PREFIX, RDF.NAMESPACE);
+        PREFIXES.put(RDFS.PREFIX, RDFS.NAMESPACE);
+        PREFIXES.put(OWL.PREFIX, OWL.NAMESPACE);
+        PREFIXES.put(XMLSchema.PREFIX, XMLSchema.NAMESPACE);
+        PREFIXES.put("mw", "http://tools.wmflabs.org/mw2sparql/ontology#");
     }
 
     private OWLOntology owlOntology;
     private ImplicitDBConstraintsReader dbConstraints;
     private Map<String,SiteConfig> sitesConfig;
+    private Map<String, Repository> repositories = new HashMap<>();
 
     private RepositoryFactory() {
         try {
             owlOntology = loadOWLOntology();
-            System.out.println(RepositoryFactory.class.getResource("/db_constraints.txt").getPath());
             dbConstraints = loadDBConstraints();
             sitesConfig = loadSitesConfig();
         } catch (Exception e) {
@@ -65,7 +74,9 @@ public class RepositoryFactory {
         }
     }
 
-    private Map<String,Repository> repositories = new HashMap<>();
+    public static RepositoryFactory getInstance() {
+        return INSTANCE;
+    }
 
     public Repository getRepositoryForSiteId(String siteId) throws Exception {
         if(!repositories.containsKey(siteId)) {
@@ -107,6 +118,7 @@ public class RepositoryFactory {
                 loadRDFMappingModel(siteConfig),
                 preferences
         );
+        repository.setNamespaces(PREFIXES);
         repository.setImplicitDBConstraints(dbConstraints);
         repository.initialize();
         return repository;
