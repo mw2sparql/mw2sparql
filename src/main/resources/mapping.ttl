@@ -52,7 +52,7 @@
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/w/index.php?oldid={page_latest}" ;
+            rr:template "{base_url}/revision/{page_latest}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:pageLatestRevision
@@ -105,7 +105,7 @@
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:Revision ;
-        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:template  "{base_url}/revision/{rev_id}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
@@ -182,7 +182,7 @@
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:MinorRevision ;
-        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:template  "{base_url}/revision/{rev_id}" ;
         rr:termType rr:IRI
     ]
 ] .
