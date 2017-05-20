@@ -25,9 +25,7 @@ import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 import org.mediawiki.sparql.mwontop.Configuration;
-
-import java.io.IOException;
-import java.net.URI;
+import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -43,7 +41,9 @@ public class Main extends ResourceConfig {
         EncodingFilter.enableFor(this, DeflateEncoder.class);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
+        RepositoryFactory.getInstance().initializeRepository();
+
         HttpServer server = startServer();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop(0)));
     }

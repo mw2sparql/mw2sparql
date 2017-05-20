@@ -79,11 +79,12 @@ public class RepositoryFactory {
         return INSTANCE;
     }
 
-    public Repository getRepository() throws Exception {
-        if (repository == null) {
-            String firstSiteId = Configuration.getInstance().getAllowedSites().iterator().next(); //TODO
-            repository = buildVirtualRepository(connectionInformationForSiteId(firstSiteId));
-        }
+    public void initializeRepository() throws Exception {
+        String firstSiteId = Configuration.getInstance().getAllowedSites().iterator().next(); //TODO
+        repository = buildVirtualRepository(connectionInformationForSiteId(firstSiteId));
+    }
+
+    public Repository getRepository() {
         return repository;
     }
 

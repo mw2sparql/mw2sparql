@@ -46,15 +46,7 @@ public class SPARQLActions {
 
     private static final int QUERY_TIMOUT_IN_S = 30;
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
-    private static Repository repository;
-
-    static {
-        try {
-            repository = RepositoryFactory.getInstance().getRepository();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
+    private static Repository REPOSITORY = RepositoryFactory.getInstance().getRepository();
 
     @GET
     public Response get(@QueryParam("query") String query, @Context Request request) {
@@ -75,7 +67,7 @@ public class SPARQLActions {
 
     private Response executeQuery(String queryString, String baseIRI, Request request) {
         try {
-            RepositoryConnection repositoryConnection = repository.getConnection();
+            RepositoryConnection repositoryConnection = REPOSITORY.getConnection();
             try {
                 Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, queryString);
                 query.setMaxQueryTime(QUERY_TIMOUT_IN_S);
