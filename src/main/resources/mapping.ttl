@@ -13,11 +13,71 @@
 # {usual_db} is replaced by the extra db containing the namespace table
 # {site_id} is replaced by the site id like "enwiki"
 
-[ # Page: main mapping
+[ # Page: main mapping, NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace"
+        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model FROM {db}.page WHERE page_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_id" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_namespace" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageNamespaceId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_title" ;
+            rr:termType rr:Literal ;
+            rr:language "{lang}"
+        ] ;
+        rr:predicate schema:name
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/w/index.php?oldid={page_latest}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:pageLatestRevision
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_content_model" ;
+            rr:termType rr:Literal
+        ] ;
+        rr:predicate mw:pageContentModelId
+    ]
+] .
+
+[ # Page: main mapping, not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace AND page_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -73,11 +133,25 @@
     ]
 ] .
 
-[ #Page: redirect
+[ #Page: redirect, NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace AND page_is_redirect = 1"
+        rr:sqlQuery  "SELECT page_title FROM {db}.page WHERE page_is_redirect = 1 AND page_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:RedirectPage ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ]
+] .
+
+[ #Page: redirect, not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace AND page_is_redirect = 1 AND page_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -87,11 +161,26 @@
     ]
 ] .
 
-[ #Page: new
+[ #Page: new, NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace AND page_is_new = 1"
+        rr:sqlQuery  "SELECT page_title FROM {db}.page WHERE page_is_new = 1 AND page_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:NewPage ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ]
+] .
+
+
+[ #Page: new, not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, ns_name FROM {db}.page, {usual_db}.{site_id}_ns_id2name WHERE ns_id = page_namespace AND page_is_new = 1 AND page_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -105,7 +194,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format, ns_name, page_title FROM {db}.revision, {db}.page, {usual_db}.{site_id}_ns_id2name WHERE page_id = rev_page AND ns_id = page_namespace"
+        rr:sqlQuery  "SELECT rev_id, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format FROM {db}.revision"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -121,15 +210,6 @@
             rr:termType rr:Literal
         ] ;
         rr:predicate mw:revisionId
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{ns_name}:{page_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:revisionOfPage
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -192,11 +272,123 @@
     ]
 ] .
 
-[ #PageLinks
+[ # Revision to page NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, pl_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name FROM {db}.pagelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = pl_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = pl_namespace"
+        rr:sqlQuery  "SELECT rev_id, page_title FROM {db}.revision, {db}.page WHERE page_id = rev_page AND page_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Revision ;
+        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+       a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{page_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:revisionOfPage
+    ]
+] .
+
+[ # Revision to page not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT rev_id, ns_name, page_title FROM {db}.revision, {db}.page, {usual_db}.{site_id}_ns_id2name WHERE page_id = rev_page AND ns_id = page_namespace AND page_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Revision ;
+        rr:template  "{base_url}/w/index.php?oldid={rev_id}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{ns_name}:{page_title}" ;
+           rr:termType rr:IRI
+       ] ;
+       rr:predicate mw:revisionOfPage
+    ]
+] .
+
+[ #PageLinks not NS-0 to not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, pl_title FROM {db}.pagelinks, {db}.page WHERE page_id = pl_from AND page_namespace = 0 AND pl_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{pl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:internalLinkTo
+    ] ;
+] .
+
+[ #PageLinks not NS-0 to NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, pl_title, to_ns.ns_name AS to_ns_name FROM {db}.pagelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = pl_from AND page_namespace = 0 AND to_ns.ns_id = pl_namespace AND pl_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{to_ns_name}:{pl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:internalLinkTo
+    ] ;
+] .
+
+[ #PageLinks NS-0 to not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, pl_title, from_ns.ns_name AS from_ns_name FROM {db}.pagelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns WHERE page_id = pl_from AND from_ns.ns_id = page_namespace AND pl_namespace = 0 AND page_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{from_ns_name}:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{pl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:internalLinkTo
+    ] ;
+] .
+
+[ #PageLinks not NS-0 to not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, pl_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name FROM {db}.pagelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = pl_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = pl_namespace AND page_namespace != 0 AND pl_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -214,11 +406,77 @@
     ] ;
 ] .
 
-[ #TemplateLinks
+[ #TemplateLinks from NS-0 to NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, tl_title FROM {db}.templatelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = tl_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = tl_namespace"
+        rr:sqlQuery  "SELECT page_title, tl_title FROM {db}.templatelinks, {db}.page WHERE page_id = tl_from AND page_namespace = 0 AND tl_namespace = 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{tl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:includesPage
+    ] ;
+] .
+
+[ #TemplateLinks from NS-0 to not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, to_ns.ns_name AS to_ns_name, tl_title FROM {db}.templatelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = tl_from AND page_namespace = 0 AND to_ns.ns_id = tl_namespace AND tl_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{to_ns_name}:{tl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:includesPage
+    ] ;
+] .
+
+[ #TemplateLinks from not NS-0 to NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, tl_title FROM {db}.templatelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = tl_from AND from_ns.ns_id = page_namespace AND tl_namespace = 0 AND page_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{from_ns_name}:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{tl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:includesPage
+    ] ;
+] .
+
+[ #TemplateLinks from not NS-0 to not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, tl_title FROM {db}.templatelinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = tl_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = tl_namespace AND tl_namespace != 0 AND page_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -236,11 +494,33 @@
     ] ;
 ] .
 
-[ #CategoryLinks
+[ #CategoryLinks NS-0
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, cl_to FROM {db}.categorylinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = cl_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = 14"
+        rr:sqlQuery  "SELECT page_title, to_ns.ns_name AS to_ns_name, cl_to FROM {db}.categorylinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = cl_from AND page_namespace = 0 AND to_ns.ns_id = 14"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{to_ns_name}:{cl_to}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:inCategory
+    ] ;
+] .
+
+[ #CategoryLinks not NS-0
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, cl_to FROM {db}.categorylinks, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = cl_from AND from_ns.ns_id = page_namespace AND page_namespace != 0 AND to_ns.ns_id = 14"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -258,11 +538,77 @@
     ] ;
 ] .
 
-[ #Redirections + TODO cross wiki redirects and fragments
+[ #Redirections NS-0 to NS-0 + TODO cross wiki redirects and fragments
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, rd_title FROM {db}.redirect, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = rd_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = rd_namespace AND rd_interwiki = ''"
+        rr:sqlQuery  "SELECT page_title, rd_title FROM {db}.redirect, {db}.page WHERE page_id = rd_from AND page_namespace = 0 AND rd_namespace = 0 AND rd_interwiki = ''"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{rd_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:redirectsTo
+    ] ;
+] .
+
+[ #Redirections NS-0 to not NS-0 + TODO cross wiki redirects and fragments
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, to_ns.ns_name AS to_ns_name, rd_title FROM {db}.redirect, {db}.page, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = rd_from AND page_namespace = 0 AND to_ns.ns_id = rd_namespace AND rd_interwiki = '' AND rd_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{to_ns_name}:{rd_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:redirectsTo
+    ] ;
+] .
+
+[ #Redirections not NS-0 to NS-0 + TODO cross wiki redirects and fragments
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, rd_title FROM {db}.redirect, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns WHERE page_id = rd_from AND from_ns.ns_id = page_namespace AND rd_namespace = 0 AND rd_interwiki = ''  AND page_namespace != 0"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/{from_ns_name}:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/{rd_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:redirectsTo
+    ] ;
+] .
+
+[ #Redirections not NS-0 to not NS-0 + TODO cross wiki redirects and fragments
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, from_ns.ns_name AS from_ns_name, to_ns.ns_name AS to_ns_name, rd_title FROM {db}.redirect, {db}.page, {usual_db}.{site_id}_ns_id2name AS from_ns, {usual_db}.{site_id}_ns_id2name AS to_ns WHERE page_id = rd_from AND from_ns.ns_id = page_namespace AND to_ns.ns_id = rd_namespace AND rd_interwiki = '' AND page_namespace != 0 AND rd_namespace != 0"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
