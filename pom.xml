@@ -31,9 +31,20 @@
         <jerseyVersion>2.25.1</jerseyVersion>
         <junitVersion>4.12</junitVersion>
         <mysqlVersion>5.1.41</mysqlVersion>
-        <ontopVersion>1.18.0</ontopVersion>
+        <ontopVersion>1.18.1-SNAPSHOT</ontopVersion>
         <servletVersion>3.1.0</servletVersion>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>Ontop-mvn-repo</id>
+            <url>https://raw.github.com/Tpt/ontop/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
