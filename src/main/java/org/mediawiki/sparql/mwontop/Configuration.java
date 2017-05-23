@@ -20,6 +20,7 @@ package org.mediawiki.sparql.mwontop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,13 +65,12 @@ public class Configuration {
     }
 
     public URI getBaseURI() {
-        try {
-            return new URI(properties.getProperty("app.http.baseURI"));
-        } catch (URISyntaxException e) {
-            LOGGER.error("You should define an app.http.baseURI in the config.properties file", e);
-            System.exit(1);
-            return null;
+        UriBuilder uriBuilder = UriBuilder.fromUri(properties.getProperty("app.http.baseURI"));
+        String port = System.getenv("PORT");
+        if (port != null) {
+            uriBuilder.port(Integer.valueOf(port));
         }
+        return uriBuilder.build();
     }
 
     public String getDatabaseHost() {
