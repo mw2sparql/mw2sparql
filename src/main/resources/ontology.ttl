@@ -23,7 +23,6 @@ mw:pageId a owl:DatatypeProperty, owl:FunctionalProperty  .
 mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty  .
 
 schema:name a owl:DatatypeProperty, owl:FunctionalProperty .
-    #rdf:langString is not supported yet by Ontop
 
 mw:pageLatestRevision a owl:ObjectProperty, owl:FunctionalProperty .
 
@@ -47,8 +46,7 @@ mw:revisionOfPage a owl:ObjectProperty, owl:FunctionalProperty .
 
 schema:comment a owl:DatatypeProperty, owl:FunctionalProperty .
 
-mw:revisionUserName a owl:DatatypeProperty, owl:FunctionalProperty ;
-    rdfs:range xsd:string .
+mw:revisionUserName a owl:DatatypeProperty, owl:FunctionalProperty .
 
 schema:contentSize a owl:DatatypeProperty, owl:FunctionalProperty .
 
