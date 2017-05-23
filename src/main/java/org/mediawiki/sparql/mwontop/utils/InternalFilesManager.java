@@ -17,6 +17,7 @@
 
 package org.mediawiki.sparql.mwontop.utils;
 
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -56,7 +57,7 @@ public class InternalFilesManager {
     }
 
     public static Model parseTurtle(String content) throws IOException, RDFParseException, RDFHandlerException {
-        try(InputStream inputStream = new ByteArrayInputStream(content.getBytes())) {
+        try (InputStream inputStream = new ByteArrayInputStream(content.getBytes(CharEncoding.UTF_8))) {
             return parseTurtleFile(inputStream);
         }
     }

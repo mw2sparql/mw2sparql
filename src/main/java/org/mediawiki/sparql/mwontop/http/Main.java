@@ -26,11 +26,16 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 
 /**
  * @author Thomas Pellissier Tanon
  */
 public class Main extends ResourceConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     private Main() {
         packages("org.mediawiki.sparql.mwontop.http");
@@ -41,14 +46,19 @@ public class Main extends ResourceConfig {
         EncodingFilter.enableFor(this, DeflateEncoder.class);
     }
 
-    public static void main(String[] args) throws Exception {
-        RepositoryFactory.getInstance().initializeRepository();
-
+    public static void main(String[] args) {
+        try {
+            RepositoryFactory.getInstance().initializeRepository();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
         HttpServer server = startServer();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop(0)));
     }
 
     private static HttpServer startServer() {
-        return JdkHttpServerFactory.createHttpServer(Configuration.getInstance().getBaseURI(), new Main());
+        URI baseURI = Configuration.getInstance().getBaseURI();
+        LOGGER.info("Starting server at: " + baseURI.toString());
+        return JdkHttpServerFactory.createHttpServer(baseURI, new Main());
     }
 }

@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import it.unibz.inf.ontop.sql.*;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.api.SiteInfo;
@@ -138,7 +139,7 @@ public class RepositoryFactory {
                         .replace("{db}", siteConfig.getDatabaseName() + "_p")
                         .replace("{site_id}", siteConfig.getDatabaseName())
                         .replace("{usual_db}", usualDBName)
-                        .replace("{base_url}", siteConfig.getBaseURL().replace("https://", "http://")) //TODO: crazy restriction in ontop 1.18.0.1
+                        .replace("{base_url}", siteConfig.getBaseURL())
         );
     }
 
@@ -155,7 +156,7 @@ public class RepositoryFactory {
                 outputStream.write(fileContent
                         .replace("{db}", siteId + "_p")
                         .replace("{usual_db}", usualDBName)
-                        .getBytes()
+                        .getBytes(CharEncoding.UTF_8)
                 );
             }
         }
@@ -163,6 +164,7 @@ public class RepositoryFactory {
     }
 
     private Map<String, SiteConfig> loadSitesConfig() throws Exception {
+        LOGGER.debug("Retriving sites configuration");
         MySQLConnectionInformation connectionInformation = connectionInformationForSiteId();
         try (Connection connection = connectionInformation.createConnection()) {
             try (ResultSet resultSet = connection.createStatement().executeQuery("SELECT dbname, lang, name, url FROM meta_p.wiki;")) {
@@ -175,6 +177,7 @@ public class RepositoryFactory {
                             resultSet.getString("url")
                     ));
                 }
+                LOGGER.debug(siteConfig.size() + " sites retrived");
                 return siteConfig;
             }
         }
@@ -235,7 +238,7 @@ public class RepositoryFactory {
             }
             for (String siteId : Configuration.getInstance().getAllowedSites()) {
                 SiteInfo siteInfo = SiteInfo.loadSiteInfo(sitesConfig.get(siteId).getBaseURL());
-                LOGGER.info(siteId);
+                LOGGER.info("Filling namespace database for " + siteId);
                 String tablesPrefix = connectionInformation.getUser() + "__extra." + siteInfo.getWikiId() + "_";
                 try (Statement statement = connection.createStatement()) {
                     statement.execute("CREATE TABLE IF NOT EXISTS " + tablesPrefix + "ns_id2name (" +
