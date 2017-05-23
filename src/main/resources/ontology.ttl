@@ -36,8 +36,6 @@ mw:inCategory a owl:ObjectProperty .
 
 mw:redirectsTo a owl:ObjectProperty .
 
-schema:url a owl:ObjectProperty, owl:FunctionalProperty .
-
 # Revision properties
 
 mw:revisionId a owl:DatatypeProperty, owl:FunctionalProperty .
