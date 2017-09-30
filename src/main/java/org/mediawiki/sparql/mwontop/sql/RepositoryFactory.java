@@ -90,6 +90,7 @@ public class RepositoryFactory {
         OntopSystemConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .basicImplicitConstraintFile(buildDBConstraintsFile(usualDBName))
                 .dbMetadata(loadDBMetadata(connectionInformation))
+                .enableIRISafeEncoding(false)
                 .jdbcDriver("com.mysql.jdbc.Driver")
                 .jdbcUrl("jdbc:mysql://" + connectionInformation.getHost() + "/" + connectionInformation.getDatabaseName() + "?sessionVariables=sql_mode='ANSI'")
                 .jdbcName(connectionInformation.getDatabaseName())
