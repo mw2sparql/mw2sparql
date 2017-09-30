@@ -37,11 +37,13 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable throwable) {
-        LOGGER.error(throwable.getMessage(), throwable);
-
         int status = 500;
         if (throwable instanceof WebApplicationException) {
             status = ((WebApplicationException) throwable).getResponse().getStatus();
+        }
+
+        if (status % 100 == 5) {
+            LOGGER.error(throwable.getMessage(), throwable);
         }
 
         return Response.status(status)

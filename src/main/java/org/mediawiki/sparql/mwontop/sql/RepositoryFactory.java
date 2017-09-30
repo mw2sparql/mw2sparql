@@ -18,22 +18,19 @@
 package org.mediawiki.sparql.mwontop.sql;
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.repository.Repository;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.api.SiteInfo;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
-import org.openrdf.model.Model;
-import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.repository.Repository;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -52,18 +49,9 @@ import java.util.Set;
 public class RepositoryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryFactory.class);
     private static final RepositoryFactory INSTANCE = new RepositoryFactory();
-    private static final Map<String, String> PREFIXES = new HashMap<>();
     private static final Set<String> TABLES_USED = Sets.newHashSet(
-            "category", "categorylinks", "change_tag", "externallinks", "image", "imagelinks", "interwiki", "iwlinks", "langlinks", "logging", "oldimage", "page", "pagelinks", "page_props", "page_restrictions", "protected_titles", "recentchanges", "redirect", "revision", "sites", "site_identifiers", "site_stats", "tag_summary", "templatelinks", "user", "user_groups", "user_newtalk", "user_properties", "tag_summary", "valid_tag", "watchlist"
+            "category", "categorylinks", "change_tag", "externallinks", "image", "imagelinks", "interwiki", "iwlinks", "langlinks", "logging", "oldimage", "page", "pagelinks", "page_props", "page_restrictions", "protected_titles", "recentchanges", "redirect", "revision", "sites", "site_identifiers", "site_stats", "tag_summary", "templatelinks", "user", "user_groups", "user_properties", "tag_summary", "valid_tag"
     );
-
-    static {
-        PREFIXES.put(RDF.PREFIX, RDF.NAMESPACE);
-        PREFIXES.put(RDFS.PREFIX, RDFS.NAMESPACE);
-        PREFIXES.put(OWL.PREFIX, OWL.NAMESPACE);
-        PREFIXES.put(XMLSchema.PREFIX, XMLSchema.NAMESPACE);
-        PREFIXES.put("mw", "http://tools.wmflabs.org/mw2sparql/ontology#");
-    }
 
     private Repository repository;
 
@@ -91,37 +79,27 @@ public class RepositoryFactory {
 
     private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation) throws Exception {
         Map<String, SiteConfig> sitesConfig = loadSitesConfig();
-        setupNamespaceDatabase(sitesConfig);
+        //setupNamespaceDatabase(sitesConfig);
 
-        QuestPreferences preferences = new QuestPreferences();
-        preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preferences.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-        preferences.setCurrentValueOf(QuestPreferences.DBNAME, connectionInformation.getDatabaseName());
-        preferences.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-        preferences.setCurrentValueOf(
-                QuestPreferences.JDBC_URL,
-                "jdbc:mysql://" + connectionInformation.getHost() + "/" + connectionInformation.getDatabaseName()
-                        + "?sessionVariables=sql_mode='ANSI'"
-        );
-        preferences.setCurrentValueOf(QuestPreferences.DBUSER, connectionInformation.getUser());
-        preferences.setCurrentValueOf(QuestPreferences.DBPASSWORD, connectionInformation.getPassword());
         String usualDBName = connectionInformation.getUser() + "__extra";
-
-
         Model rdfMapping = new LinkedHashModel();
         for (String siteId : Configuration.getInstance().getAllowedSites()) {
             rdfMapping.addAll(loadRDFMappingModelForSite(sitesConfig.get(siteId), usualDBName));
         }
 
-        SesameVirtualRepo repository = new SesameVirtualRepo(
-                connectionInformation.getDatabaseName(),
-                loadOWLOntology(),
-                rdfMapping,
-                loadDBMetadata(connectionInformation),
-                preferences
-        );
-        repository.setNamespaces(PREFIXES);
-        repository.setImplicitDBConstraints(loadDBConstraints(usualDBName));
+        OntopSystemConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .basicImplicitConstraintFile(buildDBConstraintsFile(usualDBName))
+                .dbMetadata(loadDBMetadata(connectionInformation))
+                .jdbcDriver("com.mysql.jdbc.Driver")
+                .jdbcUrl("jdbc:mysql://" + connectionInformation.getHost() + "/" + connectionInformation.getDatabaseName() + "?sessionVariables=sql_mode='ANSI'")
+                .jdbcName(connectionInformation.getDatabaseName())
+                .jdbcUser(connectionInformation.getUser())
+                .jdbcPassword(connectionInformation.getPassword())
+                .ontology(loadOWLOntology())
+                .r2rmlMappingGraph((new RDF4J()).asGraph(rdfMapping))
+                .build();
+
+        OntopRepository repository = OntopRepository.defaultRepository(configuration);
         repository.initialize();
         return repository;
     }
@@ -143,8 +121,7 @@ public class RepositoryFactory {
         );
     }
 
-    private ImplicitDBConstraintsReader loadDBConstraints(String usualDBName) throws IOException {
-        //ImplicitDBConstraintsReader takes a file as input so we have to do a copy
+    private File buildDBConstraintsFile(String usualDBName) throws IOException {
         File file = File.createTempFile("db_constraints", ".tmp");
         file.deleteOnExit();
         try (
@@ -160,7 +137,7 @@ public class RepositoryFactory {
                 );
             }
         }
-        return new ImplicitDBConstraintsReader(file);
+        return file;
     }
 
     private Map<String, SiteConfig> loadSitesConfig() throws Exception {
@@ -184,9 +161,9 @@ public class RepositoryFactory {
     }
 
     private DBMetadata loadDBMetadata(MySQLConnectionInformation connectionInformation) throws SQLException {
-        DBMetadata dbMetadata;
+        RDBMetadata dbMetadata;
         try (Connection connection = connectionInformation.withDatabase("meta_p").createConnection()) {
-            dbMetadata = DBMetadataExtractor.createMetadata(connection);
+            dbMetadata = RDBMetadataExtractionTools.createMetadata(connection);
         }
         for (String siteId : Configuration.getInstance().getAllowedSites()) {
             addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(connectionInformation.getUser() + "__extra"), Sets.newHashSet(
@@ -197,7 +174,7 @@ public class RepositoryFactory {
         return dbMetadata;
     }
 
-    private void addTablesToMetadata(DBMetadata dbMetadata, MySQLConnectionInformation connectionInformation, Collection<String> tables) throws SQLException {
+    private void addTablesToMetadata(RDBMetadata dbMetadata, MySQLConnectionInformation connectionInformation, Collection<String> tables) throws SQLException {
         QuotedIDFactory qidFactory = dbMetadata.getQuotedIDFactory();
         try (Connection connection = connectionInformation.createConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();

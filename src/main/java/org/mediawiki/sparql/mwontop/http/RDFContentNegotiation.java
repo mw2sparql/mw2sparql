@@ -17,8 +17,8 @@
 
 package org.mediawiki.sparql.mwontop.http;
 
-import info.aduna.lang.FileFormat;
-import info.aduna.lang.service.FileFormatServiceRegistry;
+import org.eclipse.rdf4j.common.lang.FileFormat;
+import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,16 +29,15 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Variant;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author Thomas Pellissier Tanon
  */
-class SesameContentNegotiation {
+class RDFContentNegotiation {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SesameContentNegotiation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RDFContentNegotiation.class);
 
     static  <FF extends FileFormat, S> FormatService<S> getServiceForFormat(FileFormatServiceRegistry<FF, S> writerRegistry, Request request) {
         List<Variant> aceptedVariants = buildVariants(writerRegistry.getKeys());
@@ -47,11 +46,11 @@ class SesameContentNegotiation {
             throw new NotAcceptableException("No acceptable result format found. Accepted format are: " +
                     aceptedVariants.stream().map(variant -> variant.getMediaType().toString()).collect(Collectors.joining(", ")));
         }
-        FF fileFormat = Optional.ofNullable(writerRegistry.getFileFormatForMIMEType(bestResponseVariant.getMediaType().toString())).orElseThrow(() -> {
+        FF fileFormat = writerRegistry.getFileFormatForMIMEType(bestResponseVariant.getMediaType().toString()).orElseThrow(() -> {
             LOGGER.error("Not able to retrieve writer for " + bestResponseVariant.getMediaType());
             return new InternalServerErrorException("Not able to retrieve writer for " + bestResponseVariant.getMediaType());
         });
-        return new FormatService<>(fileFormat, Optional.ofNullable(writerRegistry.get(fileFormat)).orElseThrow(() -> {
+        return new FormatService<>(fileFormat, writerRegistry.get(fileFormat).orElseThrow(() -> {
             LOGGER.error("Unable to write " + fileFormat);
             return new InternalServerErrorException("Unable to write " + fileFormat);
         }));

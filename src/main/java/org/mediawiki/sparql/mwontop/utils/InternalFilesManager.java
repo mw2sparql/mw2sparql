@@ -17,12 +17,12 @@
 
 package org.mediawiki.sparql.mwontop.utils;
 
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
-import org.openrdf.model.Model;
-import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.StatementCollector;
+import org.apache.commons.lang3.CharEncoding;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -33,7 +33,7 @@
         <jerseyVersion>2.25.1</jerseyVersion>
         <junitVersion>4.12</junitVersion>
         <mysqlVersion>5.1.41</mysqlVersion>
-        <ontopVersion>1.18.1-SNAPSHOT</ontopVersion>
+        <ontopVersion>3.0.0-beta-1</ontopVersion>
         <servletVersion>3.1.0</servletVersion>
     </properties>
 
@@ -56,7 +56,7 @@
         </dependency>
         <dependency>
             <groupId>it.unibz.inf.ontop</groupId>
-            <artifactId>ontop-quest-sesame</artifactId>
+            <artifactId>ontop-rdf4j-config-sql</artifactId>
             <version>${ontopVersion}</version>
         </dependency>
         <dependency>

@@ -18,17 +18,17 @@
 package org.mediawiki.sparql.mwontop.http;
 
 
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriterFactory;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriterRegistry;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterFactory;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterRegistry;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFWriterFactory;
+import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
-import org.openrdf.query.*;
-import org.openrdf.query.resultio.BooleanQueryResultWriterFactory;
-import org.openrdf.query.resultio.BooleanQueryResultWriterRegistry;
-import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
-import org.openrdf.query.resultio.TupleQueryResultWriterRegistry;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFWriterFactory;
-import org.openrdf.rio.RDFWriterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,18 +44,23 @@ import javax.ws.rs.core.StreamingOutput;
 @Path("/sparql")
 public class SPARQLActions {
 
-    private static final int QUERY_TIMOUT_IN_S = 30;
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
     private static Repository REPOSITORY = RepositoryFactory.getInstance().getRepository();
 
     @GET
     public Response get(@QueryParam("query") String query, @Context Request request) {
+        if (query == null) {
+            throw new BadRequestException("You should set a SPARQL query using the 'query' URL query parameter");
+        }
         return executeQuery(query, null, request);
     }
 
     @POST
     @Consumes({"application/x-www-form-urlencoded", "multipart/form-data"})
     public Response postForm(@FormParam("query") String query, @Context Request request) {
+        if (query == null) {
+            throw new BadRequestException("You should POST a SPARQL query with the application/sparql-query content type");
+        }
         return executeQuery(query, null, request);
     }
 
@@ -70,7 +75,6 @@ public class SPARQLActions {
             RepositoryConnection repositoryConnection = REPOSITORY.getConnection();
             try {
                 Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, queryString);
-                query.setMaxQueryTime(QUERY_TIMOUT_IN_S);
                 if (query instanceof BooleanQuery) {
                     return evaluateBooleanQuery((BooleanQuery) query, request);
                 } else if (query instanceof GraphQuery) {
@@ -93,8 +97,8 @@ public class SPARQLActions {
     }
 
     private Response evaluateBooleanQuery(BooleanQuery query, Request request) {
-        SesameContentNegotiation.FormatService<BooleanQueryResultWriterFactory> format =
-                SesameContentNegotiation.getServiceForFormat(BooleanQueryResultWriterRegistry.getInstance(), request);
+        RDFContentNegotiation.FormatService<BooleanQueryResultWriterFactory> format =
+                RDFContentNegotiation.getServiceForFormat(BooleanQueryResultWriterRegistry.getInstance(), request);
         return Response.ok(
                 (StreamingOutput) outputStream -> {
                     try {
@@ -104,13 +108,13 @@ public class SPARQLActions {
                         throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 },
-                SesameContentNegotiation.variantForFormat(format.getFormat())
+                RDFContentNegotiation.variantForFormat(format.getFormat())
         ).build();
     }
 
     private Response evaluateGraphQuery(GraphQuery query, Request request) {
-        SesameContentNegotiation.FormatService<RDFWriterFactory> format =
-                SesameContentNegotiation.getServiceForFormat(RDFWriterRegistry.getInstance(), request);
+        RDFContentNegotiation.FormatService<RDFWriterFactory> format =
+                RDFContentNegotiation.getServiceForFormat(RDFWriterRegistry.getInstance(), request);
         return Response.ok(
                 (StreamingOutput) outputStream -> {
                     try {
@@ -120,13 +124,13 @@ public class SPARQLActions {
                         throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 },
-                SesameContentNegotiation.variantForFormat(format.getFormat())
+                RDFContentNegotiation.variantForFormat(format.getFormat())
         ).build();
     }
 
     private Response evaluateTupleQuery(TupleQuery query, Request request) {
-        SesameContentNegotiation.FormatService<TupleQueryResultWriterFactory> format =
-                SesameContentNegotiation.getServiceForFormat(TupleQueryResultWriterRegistry.getInstance(), request);
+        RDFContentNegotiation.FormatService<TupleQueryResultWriterFactory> format =
+                RDFContentNegotiation.getServiceForFormat(TupleQueryResultWriterRegistry.getInstance(), request);
         return Response.ok(
                 (StreamingOutput) outputStream -> {
                     try {
@@ -136,7 +140,7 @@ public class SPARQLActions {
                         throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 },
-                SesameContentNegotiation.variantForFormat(format.getFormat())
+                RDFContentNegotiation.variantForFormat(format.getFormat())
         ).build();
     }
 }

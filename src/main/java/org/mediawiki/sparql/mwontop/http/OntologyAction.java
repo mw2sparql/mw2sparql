@@ -18,8 +18,8 @@
 package org.mediawiki.sparql.mwontop.http;
 
 
+import org.eclipse.rdf4j.rio.*;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
-import org.openrdf.rio.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,8 @@ public class OntologyAction {
 
     @GET
     public Response get(@Context Request request) {
-        SesameContentNegotiation.FormatService<RDFWriterFactory> format =
-                SesameContentNegotiation.getServiceForFormat(RDFWriterRegistry.getInstance(), request);
+        RDFContentNegotiation.FormatService<RDFWriterFactory> format =
+                RDFContentNegotiation.getServiceForFormat(RDFWriterRegistry.getInstance(), request);
         return Response.ok(
                 (StreamingOutput) outputStream -> {
                     try {
@@ -52,7 +52,7 @@ public class OntologyAction {
                         throw new InternalServerErrorException(e);
                     }
                 },
-                SesameContentNegotiation.variantForFormat(format.getFormat())
+                RDFContentNegotiation.variantForFormat(format.getFormat())
         ).build();
     }
 }
