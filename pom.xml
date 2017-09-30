@@ -26,8 +26,10 @@
     <version>0.1-SNAPSHOT</version>
 
     <properties>
+        <activationVersion>1.1.1</activationVersion>
         <jacksonVersion>2.8.8</jacksonVersion>
         <jdkVersion>1.8</jdkVersion>
+        <jaxbVersion>2.3.0</jaxbVersion>
         <jerseyVersion>2.25.1</jerseyVersion>
         <junitVersion>4.12</junitVersion>
         <mysqlVersion>5.1.41</mysqlVersion>
@@ -58,9 +60,19 @@
             <version>${ontopVersion}</version>
         </dependency>
         <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>${activationVersion}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${servletVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxbVersion}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
