@@ -18,9 +18,13 @@ mw:MinorRevision a owl:Class .
 
 # Page properties
 
-mw:pageId a owl:DatatypeProperty, owl:FunctionalProperty  .
+schema:inLanguage a owl:DatatypeProperty, owl:FunctionalProperty .
 
-mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty  .
+schema:isPartOf a owl:ObjectProperty, owl:FunctionalProperty .
+
+mw:pageId a owl:DatatypeProperty, owl:FunctionalProperty .
+
+mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty .
 
 schema:name a owl:DatatypeProperty, owl:FunctionalProperty .
 

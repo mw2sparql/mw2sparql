@@ -27,6 +27,16 @@
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
+        rr:object "{lang}" ;
+        rr:predicate schema:inLanguage
+    ] ;
+    # TODO: buggy rr:predicateObjectMap [
+    #    a rr:PredicateObjectMap ;
+    #    rr:object <{base_url}/> ;
+    #    rr:predicate schema:isPartOf
+    #] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
             rr:column "page_id" ;
