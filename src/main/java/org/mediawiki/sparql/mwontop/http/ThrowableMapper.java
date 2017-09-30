@@ -20,6 +20,7 @@ package org.mediawiki.sparql.mwontop.http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -38,7 +39,12 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
     public Response toResponse(Throwable throwable) {
         LOGGER.error(throwable.getMessage(), throwable);
 
-        return Response.serverError()
+        int status = 500;
+        if (throwable instanceof WebApplicationException) {
+            status = ((WebApplicationException) throwable).getResponse().getStatus();
+        }
+
+        return Response.status(status)
                 .entity(throwable.getMessage())
                 .type(MediaType.TEXT_PLAIN_TYPE)
                 .language(Locale.ENGLISH)
