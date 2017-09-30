@@ -79,7 +79,7 @@ public class RepositoryFactory {
 
     private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation) throws Exception {
         Map<String, SiteConfig> sitesConfig = loadSitesConfig();
-        //setupNamespaceDatabase(sitesConfig);
+        setupNamespaceDatabase(sitesConfig);
 
         String usualDBName = connectionInformation.getUser() + "__extra";
         Model rdfMapping = new LinkedHashModel();
