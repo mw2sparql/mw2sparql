@@ -21,23 +21,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
-	private static Map<String, Map<String, String>> NAMESPACES = new Hashtable<>();
+	private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
 	private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
 	private static Map<String, String> getNamespaces(String projectHost) {
 		if (!NAMESPACES.containsKey(projectHost)) {
-            Map<String, String> ns = new Hashtable<>();
+			Map<String, String> ns = new HashMap<>();
             try {
 				SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
-				siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName));
-				siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put("ns" + nsId + ":", nsName));
+				siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName + ":"));
+				siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put("ns" + nsId + ":", nsName + ":"));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
