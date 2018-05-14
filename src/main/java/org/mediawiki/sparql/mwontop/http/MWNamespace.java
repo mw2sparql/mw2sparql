@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
     private static Map<String, Map<String, String>> namespaces = new Hashtable<>();
+    private static Pattern ns_regex = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
     private static Map<String, String> getNamespaces(String project) {
         if (!namespaces.containsKey(project)) {
@@ -55,9 +56,21 @@ class MWNamespace {
         return namespaces.get(project);
     }
 
-    private static Pattern ns_regex = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
-
-    static String transformNamespace(String input) {
+    /**
+     * Various WikiMedia projects utilize different prefixes for the same namespaces.
+     * For instance, "Category" in en.wikipedia is the same as "Категория" in ru.wikiquote
+     * This method scans input string for urls and used for both:
+     * <ul>
+     * <li>Encoding normal prefix to nsdd where dd is namespace-id (e.g. /Template: to /ns10:)
+     * <li>Decoding nsdd to project-specific namespace prefixes (e.g. /ns6: to /File:)
+     * </ul>
+     * nsdd-notation is supported by /resources/mapping.ttl
+     * and invented in order to integrate ontop with labs replica databases
+     *
+     * @param input text, that contains urls to WikiMedia projects
+     * @return text with mutated namespaces in WikiMedia urls
+     */
+    static String mutateNamespace(String input) {
         Matcher m = ns_regex.matcher(input);
         StringBuffer buf = new StringBuffer();
         while (m.find()) {
