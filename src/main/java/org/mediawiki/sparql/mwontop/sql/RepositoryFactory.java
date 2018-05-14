@@ -29,7 +29,6 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.Repository;
 import org.mediawiki.sparql.mwontop.Configuration;
-import org.mediawiki.sparql.mwontop.api.SiteInfo;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -79,7 +78,6 @@ public class RepositoryFactory {
 
     private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation) throws Exception {
         Map<String, SiteConfig> sitesConfig = loadSitesConfig();
-//        setupNamespaceDatabase(sitesConfig);
 
         String usualDBName = connectionInformation.getUser() + "__extra";
         Model rdfMapping = new LinkedHashModel();
@@ -167,10 +165,6 @@ public class RepositoryFactory {
             dbMetadata = RDBMetadataExtractionTools.createMetadata(connection);
         }
         for (String siteId : Configuration.getInstance().getAllowedSites()) {
-//            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(connectionInformation.getUser() + "__extra"), Sets.newHashSet(
-            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(siteId + "_p"), Sets.newHashSet(
-                    siteId + "_ns_name2id", siteId + "_ns_id2name"
-            ));
             addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(siteId + "_p"), TABLES_USED);
         }
         return dbMetadata;
@@ -206,60 +200,6 @@ public class RepositoryFactory {
                 }
             }
         }
-    }
-
-    private void setupNamespaceDatabase(Map<String, SiteConfig> sitesConfig) throws Exception {
-        MySQLConnectionInformation connectionInformation = connectionInformationForSiteId();
-        LOGGER.info("Starting namespace database creation");
-        try (Connection connection = connectionInformation.createConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                statement.execute("CREATE DATABASE IF NOT EXISTS " + connectionInformation.getUser() + "__extra");
-            }
-            for (String siteId : Configuration.getInstance().getAllowedSites()) {
-                SiteInfo siteInfo = SiteInfo.loadSiteInfo(sitesConfig.get(siteId).getBaseURL());
-                LOGGER.info("Filling namespace database for " + siteId);
-                String tablesPrefix = connectionInformation.getUser() + "__extra." + siteInfo.getWikiId() + "_";
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("CREATE TABLE IF NOT EXISTS " + tablesPrefix + "ns_id2name (" +
-                            "ns_id INTEGER NOT NULL, " +
-                            "ns_name VARCHAR(100) NOT NULL, " +
-                            "PRIMARY KEY(ns_id)" +
-                            ")");
-                    statement.execute("CREATE TABLE IF NOT EXISTS " + tablesPrefix + "ns_name2id (" +
-                            "ns_name VARCHAR(100) NOT NULL, " +
-                            "ns_id INTEGER NOT NULL, " +
-                            "PRIMARY KEY(ns_name)" +
-                            ")");
-                }
-                try (PreparedStatement preparedStatement = connection.prepareStatement(
-                        "REPLACE INTO " + tablesPrefix + "ns_id2name VALUES (?, ?)"
-                )) {
-                    for (Map.Entry<Integer, String> namespace : siteInfo.getNamespaceNames().entrySet()) {
-                        preparedStatement.setInt(1, namespace.getKey());
-                        if (namespace.getValue().equals("")) {
-                            preparedStatement.setString(2, "");
-                        } else {
-                            preparedStatement.setString(2, namespace.getValue());
-                        }
-                        preparedStatement.execute();
-                    }
-                }
-                try (PreparedStatement preparedStatement = connection.prepareStatement(
-                        "REPLACE INTO " + tablesPrefix + "ns_name2id VALUES (?, ?)"
-                )) {
-                    for (Map.Entry<String, Integer> namespace : siteInfo.getAllNamespaceNames().entrySet()) {
-                        if (namespace.getKey().equals("")) {
-                            preparedStatement.setString(1, "");
-                        } else {
-                            preparedStatement.setString(1, namespace.getKey());
-                        }
-                        preparedStatement.setInt(2, namespace.getValue());
-                        preparedStatement.execute();
-                    }
-                }
-            }
-        }
-        LOGGER.info("End of namespace database creation");
     }
 
     private static class MySQLConnectionInformation {
