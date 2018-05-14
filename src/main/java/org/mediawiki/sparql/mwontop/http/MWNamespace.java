@@ -31,19 +31,19 @@ class MWNamespace {
 	private static Map<String, Map<String, String>> NAMESPACES = new Hashtable<>();
 	private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
-	private static Map<String, String> getNamespaces(String projectBaseURL) {
-		if (!NAMESPACES.containsKey(projectBaseURL)) {
+	private static Map<String, String> getNamespaces(String projectHost) {
+		if (!NAMESPACES.containsKey(projectHost)) {
             Map<String, String> ns = new Hashtable<>();
             try {
-				SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectBaseURL);
+				SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
 				siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName));
 				siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put("ns" + nsId + ":", nsName));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
-			NAMESPACES.put(projectBaseURL, ns);
+			NAMESPACES.put(projectHost, ns);
         }
-		return NAMESPACES.get(projectBaseURL);
+		return NAMESPACES.get(projectHost);
     }
 
     /**

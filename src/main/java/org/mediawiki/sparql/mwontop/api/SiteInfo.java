@@ -71,8 +71,8 @@ public class SiteInfo {
         }
     }
 
-    public static SiteInfo loadSiteInfo(String baseURL) throws IOException {
-        URL url = UriBuilder.fromUri(baseURL)
+    public static SiteInfo loadSiteInfo(String projectHost) throws IOException {
+        URL url = UriBuilder.fromUri("https://" + projectHost)
                 .path("/w/api.php")
                 .replaceQuery("action=query&meta=siteinfo&siprop=general%7Cnamespaces%7Cnamespacealiases&format=json").build().toURL();
         return new SiteInfo(OBJECT_READER.readValue(url));
