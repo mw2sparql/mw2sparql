@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 MW2SPARQL developers.
+ * Copyright (c) 2017 MW2SPARQL developers.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,11 @@
  */
 package org.mediawiki.sparql.mwontop.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mediawiki.sparql.mwontop.api.SiteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,30 +28,22 @@ import java.util.regex.Pattern;
 
 class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
-    private static Map<String, Map<String, String>> namespaces = new Hashtable<>();
-    private static Pattern ns_regex = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
+	private static Map<String, Map<String, String>> NAMESPACES = new Hashtable<>();
+	private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
-    private static Map<String, String> getNamespaces(String project) {
-        if (!namespaces.containsKey(project)) {
+	private static Map<String, String> getNamespaces(String projectBaseURL) {
+		if (!NAMESPACES.containsKey(projectBaseURL)) {
             Map<String, String> ns = new Hashtable<>();
-            ObjectMapper map = new ObjectMapper();
             try {
-                JsonNode json = map.readTree(new URL("https://" + project +
-                        "/w/api.php?action=query&meta=siteinfo&siprop=namespaces|namespacealiases&format=json"));
-                for (JsonNode item : json.at("/query/namespaces")) {
-                    if (item.has("canonical")) {
-                        ns.put("ns" + item.get("id").asText() + ":", item.get("canonical").asText() + ":");
-                        ns.put(item.get("canonical").asText() + ":", "ns" + item.get("id").asText() + ":");
-                        if (item.has("*"))
-                            ns.put(item.get("*").asText() + ":", "ns" + item.get("id").asText() + ":");
-                    }
-                }
+				SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectBaseURL);
+				siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName));
+				siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put("ns" + nsId + ":", nsName));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
-            namespaces.put(project, ns);
+			NAMESPACES.put(projectBaseURL, ns);
         }
-        return namespaces.get(project);
+		return NAMESPACES.get(projectBaseURL);
     }
 
     /**
@@ -71,7 +61,7 @@ class MWNamespace {
      * @return text with mutated namespaces in WikiMedia urls
      */
     static String mutateNamespace(String input) {
-        Matcher m = ns_regex.matcher(input);
+		Matcher m = NAMESPACE_URI_REGEX.matcher(input);
         StringBuffer buf = new StringBuffer();
         while (m.find()) {
             if (m.group(2) != null && getNamespaces(m.group(1)).containsKey(m.group(2))) {
