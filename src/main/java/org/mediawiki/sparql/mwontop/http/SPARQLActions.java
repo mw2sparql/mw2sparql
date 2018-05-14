@@ -17,17 +17,14 @@
 
 package org.mediawiki.sparql.mwontop.http;
 
-
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriterFactory;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriterRegistry;
-import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterFactory;
-import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterRegistry;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFWriterFactory;
-import org.eclipse.rdf4j.rio.RDFWriterRegistry;
+import org.eclipse.rdf4j.rio.*;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +34,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
+import static org.mediawiki.sparql.mwontop.http.MWNamespace.mutateNamespace;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -74,7 +73,7 @@ public class SPARQLActions {
         try {
             RepositoryConnection repositoryConnection = REPOSITORY.getConnection();
             try {
-                Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, queryString);
+                Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString));
                 if (query instanceof BooleanQuery) {
                     return evaluateBooleanQuery((BooleanQuery) query, request);
                 } else if (query instanceof GraphQuery) {
@@ -134,7 +133,7 @@ public class SPARQLActions {
         return Response.ok(
                 (StreamingOutput) outputStream -> {
                     try {
-                        query.evaluate(format.getService().getWriter(outputStream));
+                        evaluateAndDecodeNamespaces(query, format.getService().getWriter(outputStream));
                     } catch (TupleQueryResultHandlerException | QueryEvaluationException e) {
                         LOGGER.warn(e.getMessage(), e);
                         throw new InternalServerErrorException(e.getMessage(), e);
@@ -142,5 +141,25 @@ public class SPARQLActions {
                 },
                 RDFContentNegotiation.variantForFormat(format.getFormat())
         ).build();
+    }
+
+    private void evaluateAndDecodeNamespaces(TupleQuery query, TupleQueryResultWriter writer) {
+        TupleQueryResult result = query.evaluate();
+
+        writer.startQueryResult(result.getBindingNames());
+        while (result.hasNext()) {
+            BindingSet oldSet = result.next();
+            MapBindingSet newSet = new MapBindingSet();
+            for (Binding binding : oldSet) {
+                Value value = binding.getValue();
+                if (binding.getValue() instanceof org.eclipse.rdf4j.model.IRI) {
+                    String input = value.stringValue();
+                    value = SimpleValueFactory.getInstance().createIRI(mutateNamespace(input));
+                }
+                newSet.addBinding(binding.getName(), value);
+            }
+            writer.handleSolution(newSet);
+        }
+        writer.endQueryResult();
     }
 }

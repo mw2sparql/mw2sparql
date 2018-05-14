@@ -79,7 +79,7 @@ public class RepositoryFactory {
 
     private Repository buildVirtualRepository(MySQLConnectionInformation connectionInformation) throws Exception {
         Map<String, SiteConfig> sitesConfig = loadSitesConfig();
-        setupNamespaceDatabase(sitesConfig);
+//        setupNamespaceDatabase(sitesConfig);
 
         String usualDBName = connectionInformation.getUser() + "__extra";
         Model rdfMapping = new LinkedHashModel();
@@ -167,7 +167,8 @@ public class RepositoryFactory {
             dbMetadata = RDBMetadataExtractionTools.createMetadata(connection);
         }
         for (String siteId : Configuration.getInstance().getAllowedSites()) {
-            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(connectionInformation.getUser() + "__extra"), Sets.newHashSet(
+//            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(connectionInformation.getUser() + "__extra"), Sets.newHashSet(
+            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(siteId + "_p"), Sets.newHashSet(
                     siteId + "_ns_name2id", siteId + "_ns_id2name"
             ));
             addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(siteId + "_p"), TABLES_USED);
