@@ -35,6 +35,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import java.io.ByteArrayOutputStream;
+
 import static org.mediawiki.sparql.mwontop.http.MWNamespace.mutateNamespace;
 
 /**
@@ -70,21 +72,16 @@ public class SPARQLActions {
     }
 
     private Response executeQuery(String queryString, String baseIRI, Request request) {
-        try {
-            RepositoryConnection repositoryConnection = REPOSITORY.getConnection();
-            try {
-                Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString));
-                if (query instanceof BooleanQuery) {
-                    return evaluateBooleanQuery((BooleanQuery) query, request);
-                } else if (query instanceof GraphQuery) {
-                    return evaluateGraphQuery((GraphQuery) query, request);
-                } else if (query instanceof TupleQuery) {
-                    return evaluateTupleQuery((TupleQuery) query, request);
-                } else {
-                    throw new BadRequestException("Unsupported kind of query: " + queryString);
-                }
-            } finally {
-                repositoryConnection.close();
+        try (RepositoryConnection repositoryConnection = REPOSITORY.getConnection()) {
+            Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString));
+            if (query instanceof BooleanQuery) {
+                return evaluateBooleanQuery((BooleanQuery) query, request);
+            } else if (query instanceof GraphQuery) {
+                return evaluateGraphQuery((GraphQuery) query, request);
+            } else if (query instanceof TupleQuery) {
+                return evaluateTupleQuery((TupleQuery) query, request);
+            } else {
+                throw new BadRequestException("Unsupported kind of query: " + queryString);
             }
         } catch (MalformedQueryException e) {
             LOGGER.info(e.getMessage(), e);
@@ -130,17 +127,14 @@ public class SPARQLActions {
     private Response evaluateTupleQuery(TupleQuery query, Request request) {
         RDFContentNegotiation.FormatService<TupleQueryResultWriterFactory> format =
                 RDFContentNegotiation.getServiceForFormat(TupleQueryResultWriterRegistry.getInstance(), request);
-        return Response.ok(
-                (StreamingOutput) outputStream -> {
-                    try {
-                        evaluateAndDecodeNamespaces(query, format.getService().getWriter(outputStream));
-                    } catch (TupleQueryResultHandlerException | QueryEvaluationException e) {
-                        LOGGER.warn(e.getMessage(), e);
-                        throw new InternalServerErrorException(e.getMessage(), e);
-                    }
-                },
-                RDFContentNegotiation.variantForFormat(format.getFormat())
-        ).build();
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            evaluateAndDecodeNamespaces(query, format.getService().getWriter(outputStream));
+            return Response.ok(outputStream.toByteArray(), RDFContentNegotiation.variantForFormat(format.getFormat())).build();
+        } catch (TupleQueryResultHandlerException | QueryEvaluationException e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new InternalServerErrorException(e.getMessage(), e);
+        }
     }
 
     private void evaluateAndDecodeNamespaces(TupleQuery query, TupleQueryResultWriter writer) {
