@@ -142,7 +142,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>us.askplatyp.kb.lucene.http.Main</mainClass>
+                    <mainClass>org.mediawiki.sparql.mwontop.http.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
