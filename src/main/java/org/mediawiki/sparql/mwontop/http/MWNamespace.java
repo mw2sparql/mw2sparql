@@ -28,22 +28,22 @@ import java.util.regex.Pattern;
 
 class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
-	private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
-	private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
+    private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
+    private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
-	private static Map<String, String> getNamespaces(String projectHost) {
-		if (!NAMESPACES.containsKey(projectHost)) {
-			Map<String, String> ns = new HashMap<>();
+    private static Map<String, String> getNamespaces(String projectHost) {
+        if (!NAMESPACES.containsKey(projectHost)) {
+            Map<String, String> ns = new HashMap<>();
             try {
-				SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
-				siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName + ":"));
-				siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put("ns" + nsId + ":", nsName + ":"));
+                SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
+                siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName + ":"));
+                siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName + ":", "ns" + nsId + ":"));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
-			NAMESPACES.put(projectHost, ns);
+            NAMESPACES.put(projectHost, ns);
         }
-		return NAMESPACES.get(projectHost);
+        return NAMESPACES.get(projectHost);
     }
 
     /**
@@ -61,7 +61,7 @@ class MWNamespace {
      * @return text with mutated namespaces in WikiMedia urls
      */
     static String mutateNamespace(String input) {
-		Matcher m = NAMESPACE_URI_REGEX.matcher(input);
+        Matcher m = NAMESPACE_URI_REGEX.matcher(input);
         StringBuffer buf = new StringBuffer();
         while (m.find()) {
             if (m.group(2) != null && getNamespaces(m.group(1)).containsKey(m.group(2))) {
