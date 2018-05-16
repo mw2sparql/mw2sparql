@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class MWNamespace {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SPARQLActions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MWNamespace.class);
     private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
     private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?");
 
@@ -67,7 +67,6 @@ class MWNamespace {
             if (m.group(2) != null && getNamespaces(m.group(1)).containsKey(m.group(2))) {
                 m.appendReplacement(buf, input.substring(m.start(), m.start(2)) +
                         getNamespaces(m.group(1)).get(m.group(2)) + input.substring(m.end(2), m.end()));
-                break;
             }
         }
         m.appendTail(buf);
