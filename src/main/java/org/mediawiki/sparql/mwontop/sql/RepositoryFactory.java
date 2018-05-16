@@ -90,7 +90,7 @@ public class RepositoryFactory {
                 .dbMetadata(loadDBMetadata(connectionInformation))
                 .enableIRISafeEncoding(false)
                 .jdbcDriver("com.mysql.jdbc.Driver")
-                .jdbcUrl("jdbc:mysql://" + connectionInformation.getHost() + "/" + connectionInformation.getDatabaseName() + "?sessionVariables=sql_mode='ANSI'")
+                .jdbcUrl("jdbc:mysql://" + connectionInformation.getHost() + "/" + connectionInformation.getDatabaseName() + "?characterEncoding=UTF-8&sessionVariables=sql_mode='ANSI'")
                 .jdbcName(connectionInformation.getDatabaseName())
                 .jdbcUser(connectionInformation.getUser())
                 .jdbcPassword(connectionInformation.getPassword())
