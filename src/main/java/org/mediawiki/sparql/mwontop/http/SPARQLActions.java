@@ -95,17 +95,14 @@ public class SPARQLActions {
     private Response evaluateBooleanQuery(BooleanQuery query, Request request) {
         RDFContentNegotiation.FormatService<BooleanQueryResultWriterFactory> format =
                 RDFContentNegotiation.getServiceForFormat(BooleanQueryResultWriterRegistry.getInstance(), request);
-        return Response.ok(
-                (StreamingOutput) outputStream -> {
-                    try {
-                        format.getService().getWriter(outputStream).handleBoolean(query.evaluate());
-                    } catch (QueryResultHandlerException | QueryEvaluationException e) {
-                        LOGGER.warn(e.getMessage(), e);
-                        throw new InternalServerErrorException(e.getMessage(), e);
-                    }
-                },
-                RDFContentNegotiation.variantForFormat(format.getFormat())
-        ).build();
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            format.getService().getWriter(outputStream).handleBoolean(query.evaluate());
+            return Response.ok(outputStream.toByteArray(), RDFContentNegotiation.variantForFormat(format.getFormat())).build();
+        } catch (QueryResultHandlerException | QueryEvaluationException e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new InternalServerErrorException(e.getMessage(), e);
+        }
     }
 
     private Response evaluateGraphQuery(GraphQuery query, Request request) {
