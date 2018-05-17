@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -57,10 +59,15 @@ class MWNamespace {
      * nsdd-notation is supported by /resources/mapping.ttl
      * and invented in order to integrate ontop with labs replica databases
      *
-     * @param input text, that contains urls to WikiMedia projects
+     * @param text, that contains urls to WikiMedia projects
      * @return text with mutated namespaces in WikiMedia urls
      */
-    static String mutateNamespace(String input) {
+    static String mutateNamespace(String text) {
+        String input = text;
+        try {
+            input = URLDecoder.decode(input, "UTF-8");
+        } catch (UnsupportedEncodingException ignored) {
+        }
         Matcher m = NAMESPACE_URI_REGEX.matcher(input);
         StringBuffer buf = new StringBuffer();
         while (m.find()) {
