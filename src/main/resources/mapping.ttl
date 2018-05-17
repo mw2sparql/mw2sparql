@@ -10,7 +10,6 @@
 # {base_url} is replaced before loading by the wiki base URL like "https://en.wikipedia.org"
 # {lang} is replaced by the wiki language code like "en"
 # {db} is replaced by the database name like "enwiki_p"
-# {usual_db} is replaced by the extra db containing the namespace table
 # {site_id} is replaced by the site id like "enwiki"
 
 [ # Page: main mapping, NS-0
