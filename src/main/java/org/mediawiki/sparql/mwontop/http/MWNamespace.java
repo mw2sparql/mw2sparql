@@ -32,15 +32,15 @@ import java.util.regex.Pattern;
 class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(MWNamespace.class);
     private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
-    private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:]*:)?([^>]*)");
+    private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:^>]*:)?([^>]+)");
 
     private static Map<String, String> getNamespaces(String projectHost) {
         if (!NAMESPACES.containsKey(projectHost)) {
             Map<String, String> ns = new HashMap<>();
             try {
                 SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
-                siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId + ":", nsName + ":"));
-                siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName + ":", "ns" + nsId + ":"));
+                siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId, nsName));
+                siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName, "ns" + nsId));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
@@ -61,18 +61,18 @@ class MWNamespace {
      * and invented in order to integrate ontop with labs replica databases.
      * In addition to that, blazegraph, utilized as an official Wikidata query engine
      * is very sensitive regarding encoding of umlauts in namespaces and page titles
-     * @param text, contains text with urls to WikiMedia projects
+     *
+     * @param text to be processed with urls to WikiMedia projects
      * @param decodeTitles defines whenever namespace and page titles should be decoded or encoded
      * @return text with mutated namespaces in WikiMedia urls
      */
     static String mutateNamespace(String text, boolean decodeTitles) {
         StringBuffer buf = new StringBuffer();
-        try {
-            Matcher m = NAMESPACE_URI_REGEX.matcher(text);
-            while (m.find()) {
-                String namespace = m.group(2) != null ? m.group(2) : "";
-                String pageTitle = m.group(3);
-                int articleIdx = m.group(2) != null ? m.start(2) : m.start(3);
+        Matcher m = NAMESPACE_URI_REGEX.matcher(text);
+        while (m.find()) {
+            String namespace = m.group(2) != null ? m.group(2).substring(0, m.group(2).length() - 1) : "";
+            String pageTitle = m.group(3);
+            try {
                 if (decodeTitles) {
                     namespace = URLDecoder.decode(namespace, "UTF-8");
                     pageTitle = URLDecoder.decode(pageTitle, "UTF-8");
@@ -81,15 +81,17 @@ class MWNamespace {
                     namespace = getNamespaces(m.group(1)).get(namespace);
                 }
                 if (!decodeTitles) {
-                    namespace = URLEncoder.encode(namespace, "UTF-8").replace("%3A", ":");
+                    namespace = URLEncoder.encode(namespace, "UTF-8");
                     pageTitle = URLEncoder.encode(pageTitle, "UTF-8");
                 }
-                m.appendReplacement(buf, text.substring(m.start(), articleIdx) +
-                        namespace + pageTitle + text.substring(m.end(3), m.end()));
+            } catch (UnsupportedEncodingException ignored) {
             }
-            m.appendTail(buf);
-        } catch (UnsupportedEncodingException ignored) {
+            if (!namespace.isEmpty())
+                pageTitle = namespace + ':' + pageTitle;
+            m.appendReplacement(buf, text.substring(m.start(), m.group(2) != null ? m.start(2) : m.start(3)) +
+                    pageTitle + text.substring(m.end(3), m.end()));
         }
+        m.appendTail(buf);
         return buf.toString();
     }
 }

@@ -12,86 +12,16 @@
 # {db} is replaced by the database name like "enwiki_p"
 # {site_id} is replaced by the site id like "enwiki"
 
-[ # Page: main mapping, NS-0
+[ # Page: main mapping
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model FROM {db}.page WHERE page_namespace = 0"
+        rr:tableName "{db}.page"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:Page ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:object "{lang}" ;
-        rr:predicate schema:inLanguage
-    ] ;
-    # TODO: buggy rr:predicateObjectMap [
-    #    a rr:PredicateObjectMap ;
-    #    rr:object <{base_url}/> ;
-    #    rr:predicate schema:isPartOf
-    #] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_id" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:pageId
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_namespace" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:pageNamespaceId
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_title" ;
-            rr:termType rr:Literal ;
-            rr:language "{lang}"
-        ] ;
-        rr:predicate schema:name
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/revision/{page_latest}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:pageLatestRevision
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_content_model" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:pageContentModelId
-    ]
-] .
-
-[ # Page: main mapping, not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_id, page_namespace, page_title, page_latest, page_content_model, page_namespace AS ns FROM {db}.page WHERE page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:Page ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
@@ -142,59 +72,30 @@
     ]
 ] .
 
-[ #Page: redirect, NS-0
+[ #Page: redirect
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title FROM {db}.page WHERE page_is_redirect = 1 AND page_namespace = 0"
+        rr:sqlQuery  "SELECT page_title, page_namespace FROM {db}.page WHERE page_is_redirect = 1"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:RedirectPage ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ]
 ] .
 
-[ #Page: redirect, not NS-0
+[ #Page: new
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS ns FROM {db}.page WHERE page_is_redirect = 1 AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:RedirectPage ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ]
-] .
-
-[ #Page: new, NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title FROM {db}.page WHERE page_is_new = 1 AND page_namespace = 0"
+        rr:sqlQuery  "SELECT page_title, page_namespace FROM {db}.page WHERE page_is_new = 1"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:NewPage ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ]
-] .
-
-
-[ #Page: new, not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS ns FROM {db}.page WHERE page_is_new = 1 AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:NewPage ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ]
 ] .
@@ -281,34 +182,11 @@
     ]
 ] .
 
-[ # Revision to page NS-0
+[ # Revision to page
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, page_title FROM {db}.revision, {db}.page WHERE page_id = rev_page AND page_namespace = 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:Revision ;
-        rr:template  "{base_url}/revision/{rev_id}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-       a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{page_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:revisionOfPage
-    ]
-] .
-
-[ # Revision to page not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, page_namespace AS ns, page_title FROM {db}.revision, {db}.page AS to_ns WHERE page_id = rev_page AND page_namespace != 0"
+        rr:sqlQuery  "SELECT rev_id, page_namespace, page_title FROM {db}.page INNER JOIN {db}.revision ON page_id = rev_page"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
@@ -320,315 +198,95 @@
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{ns}:{page_title}" ;
+            rr:template "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
            rr:termType rr:IRI
        ] ;
        rr:predicate mw:revisionOfPage
     ]
 ] .
 
-[ #PageLinks not NS-0 to not NS-0
+[ #PageLinks
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, pl_title FROM {db}.pagelinks, {db}.page WHERE page_id = pl_from AND page_namespace = 0 AND pl_namespace = 0"
+        rr:sqlQuery  "SELECT page_title, pl_title, page_namespace, pl_namespace FROM {db}.page INNER JOIN {db}.pagelinks ON page_id = pl_from"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{pl_title}" ;
+            rr:template "{base_url}/wiki/ns{pl_namespace}:{pl_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:internalLinkTo
     ] ;
 ] .
 
-[ #PageLinks not NS-0 to NS-0
+[ #TemplateLinks
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, pl_title, pl_namespace AS ns FROM {db}.pagelinks, {db}.page AS to_ns WHERE page_id = pl_from AND page_namespace = 0 AND pl_namespace != 0"
+        rr:sqlQuery  "SELECT page_title, page_namespace, tl_namespace, tl_title FROM {db}.page INNER JOIN {db}.templatelinks ON page_id = tl_from"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{ns}:{pl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:internalLinkTo
-    ] ;
-] .
-
-[ #PageLinks NS-0 to not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, pl_title, page_namespace AS ns FROM {db}.pagelinks, {db}.page WHERE page_id = pl_from AND pl_namespace = 0 AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{pl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:internalLinkTo
-    ] ;
-] .
-
-[ #PageLinks not NS-0 to not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, pl_title, page_namespace AS from_ns, pl_namespace AS to_ns FROM {db}.pagelinks, {db}.page WHERE page_id = pl_from AND page_namespace != 0 AND pl_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{from_ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{to_ns}:{pl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:internalLinkTo
-    ] ;
-] .
-
-[ #TemplateLinks from NS-0 to NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, tl_title FROM {db}.templatelinks, {db}.page WHERE page_id = tl_from AND page_namespace = 0 AND tl_namespace = 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{tl_title}" ;
+            rr:template "{base_url}/wiki/ns{tl_namespace}:{tl_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:includesPage
     ] ;
 ] .
 
-[ #TemplateLinks from NS-0 to not NS-0
+[ #CategoryLinks
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, tl_namespace AS ns, tl_title FROM {db}.templatelinks, {db}.page WHERE page_id = tl_from AND page_namespace = 0 AND tl_namespace != 0"
+        rr:sqlQuery  "SELECT page_title, page_namespace, cl_to, CASE WHEN cl_type IS NOT NULL THEN 14 ELSE 14 END AS cl_namespace FROM {db}.page INNER JOIN {db}.categorylinks ON page_id = cl_from"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{ns}:{tl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:includesPage
-    ] ;
-] .
-
-[ #TemplateLinks from not NS-0 to NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS ns, tl_title FROM {db}.templatelinks, {db}.page WHERE page_id = tl_from AND tl_namespace = 0 AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{tl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:includesPage
-    ] ;
-] .
-
-[ #TemplateLinks from not NS-0 to not NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS from_ns, tl_namespace AS to_ns, tl_title FROM {db}.templatelinks, {db}.page WHERE page_id = tl_from AND tl_namespace != 0 AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{from_ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{to_ns}:{tl_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:includesPage
-    ] ;
-] .
-
-[ #CategoryLinks NS-0
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, 14 AS ns, cl_to FROM {db}.categorylinks, {db}.page WHERE page_id = cl_from AND page_namespace = 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{ns}:{cl_to}" ;
+            rr:template "{base_url}/wiki/ns{cl_namespace}:{cl_to}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:inCategory
     ] ;
 ] .
 
-[ #CategoryLinks not NS-0
+[ #Redirections TODO: cross wiki redirects and fragments
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS from_ns, 14 AS to_ns, cl_to FROM {db}.categorylinks, {db}.page WHERE page_id = cl_from AND page_namespace != 0"
+        rr:sqlQuery  "SELECT page_title, page_namespace, rd_namespace, rd_title FROM {db}.page INNER JOIN {db}.redirect ON page_id = rd_from AND rd_interwiki = ''"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{from_ns}:{page_title}" ;
+        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{to_ns}:{cl_to}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:inCategory
-    ] ;
-] .
-
-[ #Redirections NS-0 to NS-0 + TODO cross wiki redirects and fragments
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, rd_title FROM {db}.redirect, {db}.page WHERE page_id = rd_from AND page_namespace = 0 AND rd_namespace = 0 AND rd_interwiki = ''"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{rd_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:redirectsTo
-    ] ;
-] .
-
-[ #Redirections NS-0 to not NS-0 + TODO cross wiki redirects and fragments
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, rd_namespace AS ns, rd_title FROM {db}.redirect, {db}.page WHERE page_id = rd_from AND page_namespace = 0 AND rd_interwiki = '' AND rd_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{ns}:{rd_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:redirectsTo
-    ] ;
-] .
-
-[ #Redirections not NS-0 to NS-0 + TODO cross wiki redirects and fragments
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS ns, rd_title FROM {db}.redirect, {db}.page WHERE page_id = rd_from AND rd_namespace = 0 AND rd_interwiki = ''  AND page_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/{rd_title}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:redirectsTo
-    ] ;
-] .
-
-[ #Redirections not NS-0 to not NS-0 + TODO cross wiki redirects and fragments
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace AS from_ns, rd_namespace AS to_ns, rd_title FROM {db}.redirect, {db}.page WHERE page_id = rd_from AND rd_interwiki = '' AND page_namespace != 0 AND rd_namespace != 0"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{from_ns}:{page_title}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{to_ns}:{rd_title}" ;
+            rr:template "{base_url}/wiki/ns{rd_namespace}:{rd_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:redirectsTo
