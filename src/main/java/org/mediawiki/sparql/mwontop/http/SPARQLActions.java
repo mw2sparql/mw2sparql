@@ -18,13 +18,15 @@
 package org.mediawiki.sparql.mwontop.http;
 
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFWriterFactory;
+import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +36,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.io.ByteArrayOutputStream;
 
 import static org.mediawiki.sparql.mwontop.http.MWNamespace.mutateNamespace;
@@ -73,7 +74,7 @@ public class SPARQLActions {
 
     private Response executeQuery(String queryString, String baseIRI, Request request) {
         try (RepositoryConnection repositoryConnection = REPOSITORY.getConnection()) {
-            Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString));
+            Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString, true));
             if (query instanceof BooleanQuery) {
                 return evaluateBooleanQuery((BooleanQuery) query, request);
             } else if (query instanceof GraphQuery) {
@@ -144,8 +145,7 @@ public class SPARQLActions {
             for (Binding binding : oldSet) {
                 Value value = binding.getValue();
                 if (binding.getValue() instanceof org.eclipse.rdf4j.model.IRI) {
-                    String input = value.stringValue();
-                    value = SimpleValueFactory.getInstance().createIRI(mutateNamespace(input));
+                    value = SimpleValueFactory.getInstance().createIRI(mutateNamespace(value.stringValue(), false));
                 }
                 newSet.addBinding(binding.getName(), value);
             }
