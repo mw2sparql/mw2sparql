@@ -37,4 +37,9 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
    
-
+      - add_ssh_keys
+  
+      - deploy:
+          command: |
+            echo 'login.tools.wmflabs.org ssh-ed25519 TybNtIoEmUacZxKi83BRYP3Q+TMeK5llxuMI6duBKEQ' >> ~/.ssh/known_hosts
+            scp -oStrictHostKeyChecking=no -r target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/logs/
