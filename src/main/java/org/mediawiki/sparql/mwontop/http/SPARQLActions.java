@@ -86,6 +86,7 @@ public class SPARQLActions {
             }
         } catch (MalformedQueryException e) {
             LOGGER.info(e.getMessage(), e);
+            LOGGER.info("Original query: " + queryString);
             throw new BadRequestException(e.getMessage(), e);
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
