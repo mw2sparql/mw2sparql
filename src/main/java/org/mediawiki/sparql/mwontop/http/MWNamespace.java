@@ -75,7 +75,8 @@ class MWNamespace {
             try {
                 if (decodeTitles) {
                     namespace = URLDecoder.decode(namespace, "UTF-8");
-                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8").replace("`", "%60");
+                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8").
+                            replace("`", "%60").replace("\"", "%22");
                 }
                 if (getNamespaces(m.group(1)).containsKey(namespace)) {
                     namespace = getNamespaces(m.group(1)).get(namespace);
