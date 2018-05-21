@@ -62,7 +62,7 @@ class MWNamespace {
      * In addition to that, blazegraph, utilized as an official Wikidata query engine
      * is very sensitive regarding encoding of umlauts in namespaces and page titles
      *
-     * @param text to be processed with urls to WikiMedia projects
+     * @param text         to be processed with urls to WikiMedia projects
      * @param decodeTitles defines whenever namespace and page titles should be decoded or encoded
      * @return text with mutated namespaces in WikiMedia urls
      */
@@ -75,7 +75,7 @@ class MWNamespace {
             try {
                 if (decodeTitles) {
                     namespace = URLDecoder.decode(namespace, "UTF-8");
-                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8");
+                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8").replace("`", "%60");
                 }
                 if (getNamespaces(m.group(1)).containsKey(namespace)) {
                     namespace = getNamespaces(m.group(1)).get(namespace);
