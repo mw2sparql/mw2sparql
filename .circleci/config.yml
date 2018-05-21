@@ -30,7 +30,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: mvn dependency:go-offline
+      - run: mvn clean package dependency:go-offline
 
       - save_cache:
           paths:
@@ -42,4 +42,4 @@ jobs:
       - deploy:
           command: |
             echo 'login.tools.wmflabs.org ssh-ed25519 TybNtIoEmUacZxKi83BRYP3Q+TMeK5llxuMI6duBKEQ' >> ~/.ssh/known_hosts
-            scp -oStrictHostKeyChecking=no -r target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/logs/
+            scp -oStrictHostKeyChecking=no -r /home/circleci/repo/target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/logs/
