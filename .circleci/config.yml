@@ -41,5 +41,5 @@ jobs:
   
       - deploy:
           command: |
-            echo 'login.tools.wmflabs.org ssh-ed25519 TybNtIoEmUacZxKi83BRYP3Q+TMeK5llxuMI6duBKEQ' >> ~/.ssh/known_hosts
-            scp -oStrictHostKeyChecking=no -r /home/circleci/repo/target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/logs/
+            echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
+            scp -r ~/repo/target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/mwontop-0.1-SNAPSHOT.new
