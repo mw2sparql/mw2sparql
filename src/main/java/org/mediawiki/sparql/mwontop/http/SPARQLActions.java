@@ -85,8 +85,8 @@ public class SPARQLActions {
                 throw new BadRequestException("Unsupported kind of query: " + queryString);
             }
         } catch (MalformedQueryException e) {
-            LOGGER.info(e.getMessage(), e);
-            LOGGER.info("Original query: " + queryString);
+            LOGGER.warn(e.getMessage(), e);
+            LOGGER.warn("Original query: " + queryString);
             throw new BadRequestException(e.getMessage(), e);
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
