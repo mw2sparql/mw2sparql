@@ -6,7 +6,3 @@
 {db}.pagelinks:pl_from:{db}.page:page_id
 {db}.templatelinks:tl_from:{db}.page:page_id
 {db}.categorylinks:cl_from:{db}.page:page_id
-{usual_db}.{db}_ns_id2name:ns_id
-{db}.pagelinks:page_namespace:{usual_db}.{db}_ns_id2name:ns_id
-{db}.templatelinks:tl_namespace:{usual_db}.{db}_ns_id2name:ns_id
-{db}.page:pl_namespace:s53381__extra.{db}_ns_id2name:ns_id
