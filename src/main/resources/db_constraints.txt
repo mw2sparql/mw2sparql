@@ -1,8 +1,0 @@
-{db}.page:page_id
-{db}.page:page_namespace,page_title
-{db}.page:page_latest:{db}.revision:rev_id
-{db}.revision:rev_id
-{db}.revision:rev_page:{db}.page:page_id
-{db}.pagelinks:pl_from:{db}.page:page_id
-{db}.templatelinks:tl_from:{db}.page:page_id
-{db}.categorylinks:cl_from:{db}.page:page_id
