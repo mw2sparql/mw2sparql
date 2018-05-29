@@ -27,18 +27,16 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.Repository;
 import org.mediawiki.sparql.mwontop.Configuration;
 import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -75,9 +73,12 @@ public class RepositoryFactory {
         Map<String, SiteConfig> sitesConfig = loadSitesConfig();
 
         Model rdfMapping = new LinkedHashModel();
-        for (String siteId : Configuration.getInstance().getAllowedSites()) {
-            rdfMapping.addAll(loadRDFMappingModelForSite(sitesConfig.get(siteId)));
+        for (SiteConfig c : sitesConfig.values()) {
+            rdfMapping.addAll(loadRDFMappingModelForSite(c));
         }
+
+        Properties prop = new Properties();
+        prop.put("ontop.completeProvidedMetadata", "false");
 
         OntopSystemConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .dbMetadata(loadDBMetadata(connectionInformation, sitesConfig))
@@ -88,19 +89,13 @@ public class RepositoryFactory {
                 .jdbcName(connectionInformation.getDatabaseName())
                 .jdbcUser(connectionInformation.getUser())
                 .jdbcPassword(connectionInformation.getPassword())
-                .ontology(loadOWLOntology())
+                .properties(prop)
                 .r2rmlMappingGraph((new RDF4J()).asGraph(rdfMapping))
                 .build();
 
         OntopRepository repository = OntopRepository.defaultRepository(configuration);
         repository.initialize();
         return repository;
-    }
-
-    private OWLOntology loadOWLOntology() throws Exception {
-        try (InputStream inputStream = this.getClass().getResourceAsStream("/ontology.ttl")) {
-            return OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(inputStream);
-        }
     }
 
     private Model loadRDFMappingModelForSite(SiteConfig siteConfig) throws Exception {
