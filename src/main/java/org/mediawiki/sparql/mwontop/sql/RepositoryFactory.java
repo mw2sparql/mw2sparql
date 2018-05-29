@@ -17,7 +17,6 @@
 
 package org.mediawiki.sparql.mwontop.sql;
 
-import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
@@ -34,10 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -45,9 +46,6 @@ import java.util.Set;
 public class RepositoryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryFactory.class);
     private static final RepositoryFactory INSTANCE = new RepositoryFactory();
-    private static final Set<String> TABLES_USED = Sets.newHashSet(
-            "page", "revision", "redirect", "pagelinks", "templatelinks", "categorylinks"
-    );
 
     private Repository repository;
 
@@ -82,7 +80,7 @@ public class RepositoryFactory {
         }
 
         OntopSystemConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .dbMetadata(loadDBMetadata(connectionInformation))
+                .dbMetadata(loadDBMetadata(connectionInformation, sitesConfig))
                 .enableIRISafeEncoding(false)
                 .jdbcDriver("com.mysql.jdbc.Driver")
                 .jdbcUrl("jdbc:mysql://" + connectionInformation.getHost() + "/" +
@@ -134,47 +132,59 @@ public class RepositoryFactory {
         }
     }
 
-    private DBMetadata loadDBMetadata(MySQLConnectionInformation connectionInformation) throws SQLException {
+    private DBMetadata loadDBMetadata(MySQLConnectionInformation connectionInformation, Map<String, SiteConfig> sitesConfig) throws SQLException {
         RDBMetadata dbMetadata;
-        try (Connection connection = connectionInformation.withDatabase("meta_p").createConnection()) {
+        try (Connection connection = connectionInformation.withDatabase().createConnection()) {
             dbMetadata = RDBMetadataExtractionTools.createMetadata(connection);
         }
-        for (String siteId : Configuration.getInstance().getAllowedSites()) {
-            addTablesToMetadata(dbMetadata, connectionInformation.withDatabase(siteId + "_p"));
-        }
-        return dbMetadata;
-    }
-
-    private void addTablesToMetadata(RDBMetadata dbMetadata, MySQLConnectionInformation connectionInformation) throws SQLException {
         QuotedIDFactory qidFactory = dbMetadata.getQuotedIDFactory();
-        try (Connection connection = connectionInformation.createConnection()) {
-            DatabaseMetaData metaData = connection.getMetaData();
-            for (String table : RepositoryFactory.TABLES_USED) {
-                DatabaseRelationDefinition currentRelation = null;
-                try (ResultSet resultSet = metaData.getColumns(null, connectionInformation.getDatabaseName(), table, null)) {
-                    while (resultSet.next()) {
-                        RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(
-                                qidFactory,
-                                connectionInformation.getDatabaseName(),
-                                resultSet.getString("TABLE_NAME")
-                        );
-                        QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(
-                                qidFactory,
-                                resultSet.getString("COLUMN_NAME")
-                        );
-                        if (currentRelation == null || !currentRelation.getID().equals(relationId)) {
-                            currentRelation = dbMetadata.createDatabaseRelation(relationId);
-                        }
-                        currentRelation.addAttribute(
-                                attributeId,
-                                resultSet.getInt("DATA_TYPE"),
-                                resultSet.getString("TYPE_NAME"),
-                                resultSet.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls
-                        );
-                    }
-                }
-            }
+        QuotedID rd_namespace = QuotedID.createIdFromDatabaseRecord(qidFactory, "rd_namespace");
+        QuotedID rd_title = QuotedID.createIdFromDatabaseRecord(qidFactory, "rd_title");
+        QuotedID rd_from = QuotedID.createIdFromDatabaseRecord(qidFactory, "rd_from");
+        QuotedID tl_namespace = QuotedID.createIdFromDatabaseRecord(qidFactory, "tl_namespace");
+        QuotedID tl_title = QuotedID.createIdFromDatabaseRecord(qidFactory, "tl_title");
+        QuotedID tl_from = QuotedID.createIdFromDatabaseRecord(qidFactory, "tl_from");
+        QuotedID page_id = QuotedID.createIdFromDatabaseRecord(qidFactory, "page_id");
+        QuotedID page_namespace = QuotedID.createIdFromDatabaseRecord(qidFactory, "page_namespace");
+        QuotedID page_title = QuotedID.createIdFromDatabaseRecord(qidFactory, "page_title");
+        QuotedID pl_namespace = QuotedID.createIdFromDatabaseRecord(qidFactory, "pl_namespace");
+        QuotedID pl_from = QuotedID.createIdFromDatabaseRecord(qidFactory, "pl_from");
+        QuotedID pl_title = QuotedID.createIdFromDatabaseRecord(qidFactory, "pl_title");
+        QuotedID cl_to = QuotedID.createIdFromDatabaseRecord(qidFactory, "cl_to");
+        QuotedID cl_from = QuotedID.createIdFromDatabaseRecord(qidFactory, "cl_from");
+
+        for (SiteConfig c : sitesConfig.values()) {
+            DatabaseRelationDefinition page = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "page"));
+            page.addAttribute(page_id, 4, "INT UNSIGNED", false);
+            page.addAttribute(page_namespace, 4, "INT", false);
+            page.addAttribute(page_title, -3, "VARBINARY", false);
+            page.addUniqueConstraint(UniqueConstraint.primaryKeyOf(page.getAttribute(page_id)));
+
+            DatabaseRelationDefinition templatelinks = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "templatelinks"));
+            templatelinks.addAttribute(tl_namespace, 4, "INT", false);
+            templatelinks.addAttribute(tl_title, -3, "VARBINARY", false);
+            templatelinks.addAttribute(tl_from, -3, "VARBINARY", false);
+            templatelinks.addForeignKeyConstraint(ForeignKeyConstraint.of(c.dbName + "-fk1", page.getAttribute(page_id), templatelinks.getAttribute(tl_from)));
+
+            DatabaseRelationDefinition categorylinks = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "categorylinks"));
+            categorylinks.addAttribute(cl_to, -3, "VARBINARY", false);
+            categorylinks.addAttribute(cl_from, 4, "INT UNSIGNED", false);
+            categorylinks.addForeignKeyConstraint(ForeignKeyConstraint.of(c.dbName + "-fk2", page.getAttribute(page_id), categorylinks.getAttribute(cl_from)));
+
+            DatabaseRelationDefinition pagelinks = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "pagelinks"));
+            pagelinks.addAttribute(pl_namespace, 4, "INT", false);
+            pagelinks.addAttribute(pl_from, 4, "INT UNSIGNED", false);
+            pagelinks.addAttribute(pl_title, -3, "VARBINARY", false);
+            pagelinks.addForeignKeyConstraint(ForeignKeyConstraint.of(c.dbName + "-fk3", page.getAttribute(page_id), pagelinks.getAttribute(pl_from)));
+
+            DatabaseRelationDefinition redirect = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "redirect"));
+            redirect.addAttribute(rd_namespace, 4, "INT", false);
+            redirect.addAttribute(rd_title, -3, "VARBINARY", false);
+            redirect.addAttribute(rd_from, 4, "INT UNSIGNED", false);
+            redirect.addForeignKeyConstraint(ForeignKeyConstraint.of(c.dbName + "-fk4", page.getAttribute(page_id), redirect.getAttribute(rd_from)));
         }
+
+        return dbMetadata;
     }
 
     private static class MySQLConnectionInformation {
@@ -210,8 +220,8 @@ public class RepositoryFactory {
             return DriverManager.getConnection("jdbc:mysql://" + getHost() + "/" + getDatabaseName(), getUser(), getPassword());
         }
 
-        MySQLConnectionInformation withDatabase(String dbName) {
-            return new MySQLConnectionInformation(host, dbName, user, password);
+        MySQLConnectionInformation withDatabase() {
+            return new MySQLConnectionInformation(host, "enwiki_p", user, password);
         }
     }
 
