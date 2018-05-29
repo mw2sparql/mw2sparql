@@ -7,30 +7,11 @@
 
 mw:Page a owl:Class .
 
-mw:RedirectPage a owl:Class .
-
-mw:NewPage a owl:Class .
-
-mw:Revision a owl:Class .
-
-mw:MinorRevision a owl:Class .
-
-
 # Page properties
-
-schema:inLanguage a owl:DatatypeProperty, owl:FunctionalProperty .
-
-schema:isPartOf a owl:ObjectProperty, owl:FunctionalProperty .
-
-mw:pageId a owl:DatatypeProperty, owl:FunctionalProperty .
 
 mw:pageNamespaceId a owl:DatatypeProperty, owl:FunctionalProperty .
 
 schema:name a owl:DatatypeProperty, owl:FunctionalProperty .
-
-mw:pageLatestRevision a owl:ObjectProperty, owl:FunctionalProperty .
-
-mw:pageContentModelId a owl:DatatypeProperty, owl:FunctionalProperty .
 
 mw:internalLinkTo a owl:ObjectProperty .
 
@@ -39,21 +20,3 @@ mw:includesPage a owl:ObjectProperty .
 mw:inCategory a owl:ObjectProperty .
 
 mw:redirectsTo a owl:ObjectProperty .
-
-# Revision properties
-
-mw:revisionId a owl:DatatypeProperty, owl:FunctionalProperty .
-
-mw:revisionOfPage a owl:ObjectProperty, owl:FunctionalProperty .
-
-schema:comment a owl:DatatypeProperty, owl:FunctionalProperty .
-
-mw:revisionUserName a owl:DatatypeProperty, owl:FunctionalProperty .
-
-schema:contentSize a owl:DatatypeProperty, owl:FunctionalProperty .
-
-mw:parentRevision a owl:ObjectProperty, owl:FunctionalProperty .
-
-mw:revisionContentModelId a owl:DatatypeProperty, owl:FunctionalProperty .
-
-schema:fileFormat a owl:DatatypeProperty, owl:FunctionalProperty .

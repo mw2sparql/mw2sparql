@@ -16,22 +16,13 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:tableName "{db}.page"
+        rr:sqlQuery "SELECT page_title, page_namespace FROM {db}.page"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:Page ;
         rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
         rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_id" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:pageId
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
@@ -51,157 +42,6 @@
             rr:language "{lang}"
         ] ;
         rr:predicate schema:name
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/revision/{page_latest}" ;
-            rr:termType rr:IRI
-        ] ;
-        rr:predicate mw:pageLatestRevision
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "page_content_model" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:pageContentModelId
-    ]
-] .
-
-[ #Page: redirect
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace FROM {db}.page WHERE page_is_redirect = 1"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:RedirectPage ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
-        rr:termType rr:IRI
-    ]
-] .
-
-[ #Page: new
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace FROM {db}.page WHERE page_is_new = 1"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:NewPage ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
-        rr:termType rr:IRI
-    ]
-] .
-
-[ # Revision: main mapping
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, rev_comment, rev_user_text, rev_len, rev_content_model, rev_content_format FROM {db}.revision"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:Revision ;
-        rr:template  "{base_url}/revision/{rev_id}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_id" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:revisionId
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_comment" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate schema:comment
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_user_text" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:revisionUserName
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_len" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate schema:contentSize
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_content_model" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate mw:revisionContentModelId
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:column "rev_content_format" ;
-            rr:termType rr:Literal
-        ] ;
-        rr:predicate schema:fileFormat
-    ]
-] .
-
-[ #Revision: minor
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id FROM {db}.revision WHERE rev_minor_edit = 1"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:MinorRevision ;
-        rr:template  "{base_url}/revision/{rev_id}" ;
-        rr:termType rr:IRI
-    ]
-] .
-
-[ # Revision to page
-    a rr:TriplesMap ;
-    rr:logicalTable [
-        a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT rev_id, page_namespace, page_title FROM {db}.page INNER JOIN {db}.revision ON page_id = rev_page"
-    ] ;
-    rr:subjectMap [
-        a rr:SubjectMap , rr:TermMap ;
-        rr:class     mw:Revision ;
-        rr:template  "{base_url}/revision/{rev_id}" ;
-        rr:termType rr:IRI
-    ] ;
-    rr:predicateObjectMap [
-        a rr:PredicateObjectMap ;
-        rr:objectMap [
-            a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
-           rr:termType rr:IRI
-       ] ;
-       rr:predicate mw:revisionOfPage
     ]
 ] .
 
