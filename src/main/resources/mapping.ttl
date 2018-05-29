@@ -29,7 +29,8 @@
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
             rr:column "page_namespace" ;
-            rr:termType rr:Literal
+            rr:termType rr:Literal ;
+            rr:datatype xsd:integer
         ] ;
         rr:predicate mw:pageNamespaceId
     ] ;
@@ -115,7 +116,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace, rd_namespace, rd_title FROM {db}.page INNER JOIN {db}.redirect ON page_id = rd_from AND rd_interwiki = ''"
+        rr:sqlQuery  "SELECT page_title, page_namespace, rd_namespace, rd_title FROM {db}.page INNER JOIN {db}.redirect ON page_id = rd_from"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
