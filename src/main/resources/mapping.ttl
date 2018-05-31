@@ -94,7 +94,7 @@
     a rr:TriplesMap ;
     rr:logicalTable [
         a rr:R2RMLView ;
-        rr:sqlQuery  "SELECT page_title, page_namespace, cl_to, CASE WHEN cl_type IS NOT NULL THEN 14 ELSE 14 END AS cl_namespace FROM {db}.page INNER JOIN {db}.categorylinks ON page_id = cl_from"
+        rr:sqlQuery  "SELECT page_title, page_namespace, cl_to, '14' AS cl_namespace FROM {db}.page INNER JOIN {db}.categorylinks ON page_id = cl_from"
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
