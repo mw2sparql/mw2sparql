@@ -21,7 +21,6 @@ import com.sun.net.httpserver.HttpServer;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.message.DeflateEncoder;
 import org.glassfish.jersey.message.GZipEncoder;
-import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 import org.mediawiki.sparql.mwontop.Configuration;
@@ -40,7 +39,6 @@ public class Main extends ResourceConfig {
     private Main() {
         packages("org.mediawiki.sparql.mwontop.http");
 
-        register(EntityFilteringFeature.class);
         register(CORSFilter.class);
         EncodingFilter.enableFor(this, GZipEncoder.class);
         EncodingFilter.enableFor(this, DeflateEncoder.class);

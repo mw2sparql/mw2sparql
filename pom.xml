@@ -26,13 +26,14 @@
     <version>0.2-SNAPSHOT</version>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ontopVersion>3.0.0-beta-2</ontopVersion>
         <activationVersion>1.1.1</activationVersion>
-        <jacksonVersion>2.8.8</jacksonVersion>
+        <jacksonVersion>2.9.5</jacksonVersion>
         <jdkVersion>1.8</jdkVersion>
         <jaxbVersion>2.3.0</jaxbVersion>
         <jerseyVersion>2.25.1</jerseyVersion>
         <mysqlVersion>5.1.41</mysqlVersion>
-        <ontopVersion>3.0.0-beta-2</ontopVersion>
     </properties>
 
     <dependencies>
@@ -43,7 +44,12 @@
         </dependency>
         <dependency>
             <groupId>it.unibz.inf.ontop</groupId>
-            <artifactId>ontop-rdf4j-config-sql</artifactId>
+            <artifactId>ontop-system-sql-owlapi</artifactId>
+            <version>${ontopVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unibz.inf.ontop</groupId>
+            <artifactId>ontop-rdf4j</artifactId>
             <version>${ontopVersion}</version>
         </dependency>
         <dependency>
@@ -69,11 +75,6 @@
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jdk-http</artifactId>
-            <version>${jerseyVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.ext</groupId>
-            <artifactId>jersey-entity-filtering</artifactId>
             <version>${jerseyVersion}</version>
         </dependency>
     </dependencies>
@@ -110,21 +111,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>org.mediawiki.sparql.mwontop.http.Main</mainClass>
-                </configuration>
             </plugin>
         </plugins>
     </build>
