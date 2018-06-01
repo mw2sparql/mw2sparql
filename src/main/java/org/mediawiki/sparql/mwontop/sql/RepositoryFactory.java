@@ -154,6 +154,10 @@ public class RepositoryFactory {
             page.addAttribute(page_namespace, 4, "INT", false);
             page.addAttribute(page_title, -3, "VARBINARY", false);
             page.addUniqueConstraint(UniqueConstraint.primaryKeyOf(page.getAttribute(page_id)));
+            page.addUniqueConstraint(UniqueConstraint.builder(page)
+                    .add(page.getAttribute(page_namespace))
+                    .add(page.getAttribute(page_title))
+                    .build("unique",false));
 
             DatabaseRelationDefinition templatelinks = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "templatelinks"));
             templatelinks.addAttribute(tl_namespace, 4, "INT", false);
