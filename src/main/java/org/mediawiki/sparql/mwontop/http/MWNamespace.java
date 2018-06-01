@@ -38,6 +38,7 @@ class MWNamespace {
         if (!NAMESPACES.containsKey(projectHost)) {
             Map<String, String> ns = new HashMap<>();
             try {
+                LOGGER.info("Loading namespaces for "+projectHost);
                 SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
                 siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId, nsName));
                 siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName, "ns" + nsId));
