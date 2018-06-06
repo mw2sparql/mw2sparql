@@ -79,6 +79,7 @@ public class RepositoryFactory {
 
         Properties prop = new Properties();
         prop.put("ontop.completeProvidedMetadata", "false");
+        prop.put("it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder", "org.mediawiki.sparql.mwontop.utils.SiteSpecificUnfolder");
 
         OntopSystemConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .dbMetadata(loadDBMetadata(connectionInformation, sitesConfig))
@@ -157,7 +158,7 @@ public class RepositoryFactory {
             page.addUniqueConstraint(UniqueConstraint.builder(page)
                     .add(page.getAttribute(page_namespace))
                     .add(page.getAttribute(page_title))
-                    .build("unique",false));
+                    .build("unique", false));
 
             DatabaseRelationDefinition templatelinks = dbMetadata.createDatabaseRelation(RelationID.createRelationIdFromDatabaseRecord(qidFactory, c.dbName + "_p", "templatelinks"));
             templatelinks.addAttribute(tl_namespace, 4, "INT", false);
