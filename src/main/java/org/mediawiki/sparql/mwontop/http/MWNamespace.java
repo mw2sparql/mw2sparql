@@ -38,10 +38,10 @@ class MWNamespace {
         if (!NAMESPACES.containsKey(projectHost)) {
             Map<String, String> ns = new HashMap<>();
             try {
-                LOGGER.info("Loading namespaces for "+projectHost);
+                LOGGER.info("Loading namespaces for " + projectHost);
                 SiteInfo siteInfo = SiteInfo.loadSiteInfo(projectHost);
-                siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("ns" + nsId, nsName));
-                siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName, "ns" + nsId));
+                siteInfo.getNamespaceNames().forEach((nsId, nsName) -> ns.put("mw" + nsId + "ns", nsName));
+                siteInfo.getAllNamespaceNames().forEach((nsName, nsId) -> ns.put(nsName, "mw" + nsId + "ns"));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
@@ -76,15 +76,17 @@ class MWNamespace {
             try {
                 if (decodeTitles) {
                     namespace = URLDecoder.decode(namespace, "UTF-8");
-                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8").
-                            replace("`", "%60").replace("\"", "%22");
+                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8")
+                            .replace("`", "%60")
+                            .replace("\"", "%22");
                 }
                 if (getNamespaces(m.group(1)).containsKey(namespace)) {
                     namespace = getNamespaces(m.group(1)).get(namespace);
                 }
                 if (!decodeTitles) {
                     namespace = URLEncoder.encode(namespace, "UTF-8");
-                    pageTitle = URLEncoder.encode(pageTitle, "UTF-8");
+                    pageTitle = URLEncoder.encode(pageTitle, "UTF-8")
+                            .replace("%2F", "/");
                 }
             } catch (UnsupportedEncodingException ignored) {
             }

@@ -21,7 +21,7 @@
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
         rr:class     mw:Page ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
@@ -54,14 +54,14 @@
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{pl_namespace}:{pl_title}" ;
+            rr:template "{base_url}/wiki/mw{pl_namespace}ns:{pl_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:internalLinkTo
@@ -76,14 +76,14 @@
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{tl_namespace}:{tl_title}" ;
+            rr:template "{base_url}/wiki/mw{tl_namespace}ns:{tl_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:includesPage
@@ -98,14 +98,14 @@
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{cl_namespace}:{cl_to}" ;
+            rr:template "{base_url}/wiki/mw{cl_namespace}ns:{cl_to}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:inCategory
@@ -120,14 +120,14 @@
     ] ;
     rr:subjectMap [
         a rr:SubjectMap , rr:TermMap ;
-        rr:template  "{base_url}/wiki/ns{page_namespace}:{page_title}" ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
         rr:termType rr:IRI
     ] ;
     rr:predicateObjectMap [
         a rr:PredicateObjectMap ;
         rr:objectMap [
             a rr:ObjectMap , rr:TermMap ;
-            rr:template "{base_url}/wiki/ns{rd_namespace}:{rd_title}" ;
+            rr:template "{base_url}/wiki/mw{rd_namespace}ns:{rd_title}" ;
             rr:termType rr:IRI
         ] ;
         rr:predicate mw:redirectsTo
