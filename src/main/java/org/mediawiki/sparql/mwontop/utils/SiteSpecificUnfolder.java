@@ -56,7 +56,7 @@ class SiteSpecificUnfolder implements QueryUnfolder {
                 for (int i = 0; i < intentionalNode.getProjectionAtom().getArity(); i++) {
                     if (intentionalNode.getProjectionAtom().getTerm(i) instanceof GroundFunctionalTerm) {
                         String firstTermValue = ((GroundFunctionalTerm) intentionalNode.getProjectionAtom().getTerm(i)).getTerm(0).toString();
-                        if (firstTermValue.contains("/wiki/ns")) siteLink = firstTermValue;
+                        if (firstTermValue.contains("/wiki/mw")) siteLink = firstTermValue;
                     }
                 }
                 if (siteLink != null) {
