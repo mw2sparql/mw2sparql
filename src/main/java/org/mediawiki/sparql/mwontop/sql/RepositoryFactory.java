@@ -113,7 +113,8 @@ public class RepositoryFactory {
         LOGGER.debug("Retriving sites configuration");
         MySQLConnectionInformation connectionInformation = connectionInformationForSiteId();
         try (Connection connection = connectionInformation.createConnection()) {
-            try (ResultSet resultSet = connection.createStatement().executeQuery("SELECT dbname, lang, name, url FROM meta_p.wiki;")) {
+            try (ResultSet resultSet = connection.createStatement().executeQuery(
+                    "SELECT * FROM wiki WHERE NOT family IN ('wikimedia', 'wikimania', 'special', 'wikidata') OR dbname IN ('commonswiki', 'specieswiki')")) {
                 Map<String, SiteConfig> siteConfig = new HashMap<>();
                 while (resultSet.next()) {
                     siteConfig.put(resultSet.getString("dbname"), new SiteConfig(
