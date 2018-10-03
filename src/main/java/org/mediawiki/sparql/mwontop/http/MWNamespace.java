@@ -88,7 +88,8 @@ class MWNamespace {
                     pageTitle = URLEncoder.encode(pageTitle, "UTF-8")
                             .replace("%28", "(")
                             .replace("%29", ")")
-                            .replace("%2F", "/");
+                            .replace("%2F", "/")
+                            .replace("%3A", ":");
                 }
             } catch (UnsupportedEncodingException ignored) {
             }
