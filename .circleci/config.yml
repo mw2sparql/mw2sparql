@@ -1,0 +1,45 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+      
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
+    
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: mvn clean package dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+   
+      - add_ssh_keys
+  
+      - deploy:
+          command: |
+            echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
+            scp -r ~/repo/target/mwontop-0.1-SNAPSHOT.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/mwontop-0.1-SNAPSHOT.new
