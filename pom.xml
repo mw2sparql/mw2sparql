@@ -77,6 +77,11 @@
             <artifactId>jersey-container-jdk-http</artifactId>
             <version>${jerseyVersion}</version>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-jdk-http</artifactId>
+            <version>${jerseyVersion}</version>
+        </dependency>
     </dependencies>
 
     <build>

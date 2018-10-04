@@ -1,0 +1,135 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+
+
+# {base_url} is replaced before loading by the wiki base URL like "https://en.wikipedia.org"
+# {lang} is replaced by the wiki language code like "en"
+# {db} is replaced by the database name like "enwiki_p"
+# {site_id} is replaced by the site id like "enwiki"
+
+[ # Page: main mapping
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery "SELECT page_title, page_namespace FROM {db}.page"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:class     mw:Page ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_namespace" ;
+            rr:termType rr:Literal ;
+            rr:datatype xsd:integer
+        ] ;
+        rr:predicate mw:pageNamespaceId
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:column "page_title" ;
+            rr:termType rr:Literal ;
+            rr:language "{lang}"
+        ] ;
+        rr:predicate schema:name
+    ]
+] .
+
+[ #PageLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, pl_title, page_namespace, pl_namespace FROM {db}.page INNER JOIN {db}.pagelinks ON page_id = pl_from"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/mw{pl_namespace}ns:{pl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:internalLinkTo
+    ] ;
+] .
+
+[ #TemplateLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, page_namespace, tl_namespace, tl_title FROM {db}.page INNER JOIN {db}.templatelinks ON page_id = tl_from"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/mw{tl_namespace}ns:{tl_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:includesPage
+    ] ;
+] .
+
+[ #CategoryLinks
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, page_namespace, cl_to, '14' AS cl_namespace FROM {db}.page INNER JOIN {db}.categorylinks ON page_id = cl_from"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/mw{cl_namespace}ns:{cl_to}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:inCategory
+    ] ;
+] .
+
+[ #Redirections TODO: cross wiki redirects and fragments
+    a rr:TriplesMap ;
+    rr:logicalTable [
+        a rr:R2RMLView ;
+        rr:sqlQuery  "SELECT page_title, page_namespace, rd_namespace, rd_title FROM {db}.page INNER JOIN {db}.redirect ON page_id = rd_from"
+    ] ;
+    rr:subjectMap [
+        a rr:SubjectMap , rr:TermMap ;
+        rr:template  "{base_url}/wiki/mw{page_namespace}ns:{page_title}" ;
+        rr:termType rr:IRI
+    ] ;
+    rr:predicateObjectMap [
+        a rr:PredicateObjectMap ;
+        rr:objectMap [
+            a rr:ObjectMap , rr:TermMap ;
+            rr:template "{base_url}/wiki/mw{rd_namespace}ns:{rd_title}" ;
+            rr:termType rr:IRI
+        ] ;
+        rr:predicate mw:redirectsTo
+    ] ;
+] .

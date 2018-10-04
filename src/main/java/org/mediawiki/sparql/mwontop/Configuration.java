@@ -27,10 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -83,11 +80,5 @@ public class Configuration {
 
     public String getDatabasePassword() {
         return properties.getProperty("app.db.password");
-    }
-
-    public Set<String> getAllowedSites() {
-        return Arrays.stream(properties.getProperty("app.db.allowedSites", "enwiki").split(","))
-                .map(String::trim)
-                .collect(Collectors.toSet());
     }
 }

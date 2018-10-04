@@ -1,0 +1,20 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+
+mw:Page a owl:Class .
+
+mw:pageNamespaceId a owl:DatatypeProperty , owl:FunctionalProperty .
+
+schema:name a owl:DatatypeProperty , owl:FunctionalProperty .
+
+mw:internalLinkTo a owl:ObjectProperty .
+
+mw:includesPage a owl:ObjectProperty .
+
+mw:inCategory a owl:ObjectProperty .
+
+mw:redirectsTo a owl:ObjectProperty .

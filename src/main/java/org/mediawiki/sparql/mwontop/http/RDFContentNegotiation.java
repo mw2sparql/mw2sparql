@@ -40,11 +40,11 @@ class RDFContentNegotiation {
     private static final Logger LOGGER = LoggerFactory.getLogger(RDFContentNegotiation.class);
 
     static  <FF extends FileFormat, S> FormatService<S> getServiceForFormat(FileFormatServiceRegistry<FF, S> writerRegistry, Request request) {
-        List<Variant> aceptedVariants = buildVariants(writerRegistry.getKeys());
-        Variant bestResponseVariant = request.selectVariant(aceptedVariants);
+        List<Variant> acceptedVariants = buildVariants(writerRegistry.getKeys());
+        Variant bestResponseVariant = request.selectVariant(acceptedVariants);
         if (bestResponseVariant == null) {
             throw new NotAcceptableException("No acceptable result format found. Accepted format are: " +
-                    aceptedVariants.stream().map(variant -> variant.getMediaType().toString()).collect(Collectors.joining(", ")));
+                    acceptedVariants.stream().map(variant -> variant.getMediaType().toString()).collect(Collectors.joining(", ")));
         }
         FF fileFormat = writerRegistry.getFileFormatForMIMEType(bestResponseVariant.getMediaType().toString()).orElseThrow(() -> {
             LOGGER.error("Not able to retrieve writer for " + bestResponseVariant.getMediaType());
