@@ -42,4 +42,4 @@ jobs:
       - deploy:
           command: |
             echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
-            scp -r ~/repo/target/mwontop-${TARGET_VESRION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/test/mwontop-${TARGET_VESRION}.jar
+            scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/test/mwontop-${TARGET_VERSION}.jar
