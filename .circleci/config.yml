@@ -22,6 +22,8 @@ jobs:
     
     steps:
 
+      - add_ssh_keys
+
       - run:
           name: Set tunnel
           command: |
@@ -43,8 +45,6 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-   
-      - add_ssh_keys
   
       - deploy:
           command: |
