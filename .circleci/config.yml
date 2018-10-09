@@ -25,8 +25,8 @@ jobs:
       - run:
           name: Set tunnel
           command: |
-          echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
-          ssh -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org
+            echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
+            ssh -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org
 
       - checkout
 
