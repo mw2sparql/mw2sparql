@@ -47,17 +47,18 @@ public class Configuration {
     }
 
     private static Configuration loadConfiguration() {
+        Properties properties = new Properties(System.getProperties());
         try {
             File basePath = new File(Configuration.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
             try(InputStream inputStream = new FileInputStream(new File(basePath,"config.properties"))) {
-                Properties properties = new Properties();
                 properties.load(inputStream);
                 return new Configuration(properties);
             }
         } catch (IOException | URISyntaxException e) {
             LOGGER.error(e.getMessage(), e);
-            System.exit(1);
-            return null;
+            LOGGER.warn( "Default properties should be specified as System properties!" );
+            //creating default properties with environment variables
+            return new Configuration( properties );
         }
     }
 
