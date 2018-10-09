@@ -30,7 +30,7 @@ jobs:
 
       - run:
           name: Open tunnel to db
-          command: ssh -f -v -N -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org &
+          command: ssh -f -v -N -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org
 
       - checkout
 
