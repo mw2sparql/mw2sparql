@@ -1,7 +1,6 @@
 package org.mediawiki.sparql.mwontop.http;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
@@ -19,10 +18,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author MZhavzharov.
  */
-public class SPARQLActionsTest extends JerseyTest {
+public class SPARQLActionsTest extends SparqlBaseTest {
 
-    private final String baseQueryPartForGet = "PREFIX rdf: %3Chttp://www.w3.org/1999/02/22-rdf-syntax-ns%23%3E PREFIX schema: %3Chttp://schema.org/%3E PREFIX mw: %3Chttp://tools" +
-            ".wmflabs.org/mw2sparql/ontology%23%3E ";
+    private final String baseQueryPartForGet = "PREFIX rdf: %3Chttp://www.w3.org/1999/02/22-rdf-syntax-ns%23%3E PREFIX schema: %3Chttp://schema.org/%3E PREFIX mw: " +
+            "%3Chttp://tools.wmflabs.org/mw2sparql/ontology%23%3E ";
     private final String baseQueryPartForPost = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> PREFIX mw: <http://tools.wmflabs" +
             ".org/mw2sparql/ontology#> ";
 
@@ -59,9 +58,9 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
-        assertEquals( "object,predicate", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "object,predicate", splitResult[ 0 ] );
         assertTrue( splitResult[ 1 ].contains( "ru.wikisource.org" ) );
     }
 
@@ -72,9 +71,9 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
-        assertEquals( "object", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "object", splitResult[ 0 ] );
         assertTrue( splitResult[ 1 ].contains( "fr.wikipedia.org" ) );
     }
 
@@ -85,9 +84,9 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 10001, splitResult.length );
-        assertEquals( "page", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "page", splitResult[ 0 ] );
     }
 
     @Test
@@ -97,10 +96,10 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
-        assertEquals( "page", splitResult[ 0 ] );
-        assertEquals( "Hauptseite", splitResult[ 1 ] );
+        assertEqualsWithoutEOL( "page", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "Hauptseite", splitResult[ 1 ] );
     }
 
     @Test
@@ -110,10 +109,10 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
-        assertEquals( "ns", splitResult[ 0 ] );
-        assertEquals( "1", splitResult[ 1 ] );
+        assertEqualsWithoutEOL( "ns", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "1", splitResult[ 1 ] );
     }
 
     @Test
@@ -123,10 +122,10 @@ public class SPARQLActionsTest extends JerseyTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( "\n\r" );
+        String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
-        assertEquals( "class", splitResult[ 0 ] );
-        assertEquals( "http://tools.wmflabs.org/mw2sparql/ontology#Page", splitResult[ 1 ] );
+        assertEqualsWithoutEOL( "class", splitResult[ 0 ] );
+        assertEqualsWithoutEOL( "http://tools.wmflabs.org/mw2sparql/ontology#Page", splitResult[ 1 ] );
     }
 
     @Test
