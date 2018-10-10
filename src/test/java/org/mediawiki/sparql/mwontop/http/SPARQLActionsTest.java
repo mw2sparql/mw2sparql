@@ -4,6 +4,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mediawiki.sparql.mwontop.sql.RepositoryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -19,6 +21,8 @@ import static org.junit.Assert.assertTrue;
  * @author MZhavzharov.
  */
 public class SPARQLActionsTest extends SparqlBaseTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger( SPARQLActionsTest.class );
 
     private final String baseQueryPartForGet = "PREFIX rdf: %3Chttp://www.w3.org/1999/02/22-rdf-syntax-ns%23%3E PREFIX schema: %3Chttp://schema.org/%3E PREFIX mw: " +
             "%3Chttp://tools.wmflabs.org/mw2sparql/ontology%23%3E ";
@@ -58,8 +62,10 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
+        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
+        LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
         assertEqualsWithoutEOL( "object,predicate", splitResult[ 0 ] );
         assertTrue( splitResult[ 1 ].contains( "ru.wikisource.org" ) );
     }
@@ -71,8 +77,10 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
+        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
+        LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
         assertEqualsWithoutEOL( "object", splitResult[ 0 ] );
         assertTrue( splitResult[ 1 ].contains( "fr.wikipedia.org" ) );
     }
@@ -96,8 +104,10 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
+        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
+        LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
         assertEqualsWithoutEOL( "page", splitResult[ 0 ] );
         assertEqualsWithoutEOL( "Hauptseite", splitResult[ 1 ] );
     }
@@ -109,6 +119,7 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
+        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
         assertEqualsWithoutEOL( "ns", splitResult[ 0 ] );
@@ -122,8 +133,10 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
+        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
+        LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
         assertEqualsWithoutEOL( "class", splitResult[ 0 ] );
         assertEqualsWithoutEOL( "http://tools.wmflabs.org/mw2sparql/ontology#Page", splitResult[ 1 ] );
     }
