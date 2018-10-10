@@ -20,6 +20,7 @@ package org.mediawiki.sparql.mwontop.http;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 
 /**
@@ -29,8 +30,9 @@ class CORSFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        response.getHeaders().add("Access-Control-Allow-Origin", "*");
-        response.getHeaders().add("Access-Control-Allow-Headers", "Origin, User-Agent, Content-Type, Content-Language, Accept, Accept-Language, Accept-Encoding, Accept-Charset");
-        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD");
+        MultivaluedMap<String, Object> headers = response.getHeaders();
+        headers.add("Access-Control-Allow-Origin", "*");
+        headers.add("Access-Control-Allow-Headers", "Origin, User-Agent, Content-Type, Content-Language, Accept, Accept-Language, Accept-Encoding, Accept-Charset");
+        headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD");
     }
 }

@@ -1,0 +1,54 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+        command: ["/bin/bash"]
+      
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx1024m -XX:MaxPermSize=256m
+    
+    steps:
+
+      - add_ssh_keys
+
+      - run:
+          name: Set ssh
+          command: echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIg/o5WGjZl1Qe5lHySiwAp8nZOHch/EsDeu4EVG7o7rrFMPJriZZRWMx5GAYkbAtFiMQB/ssXy2dT3GPy8AHXo=' >> ~/.ssh/known_hosts
+
+      - run:
+          name: Open tunnel to db
+          command: ssh -f -v -N -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org
+
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: mvn clean package dependency:go-offline ${BUILD_PROPERTIES}
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+  
+      - deploy:
+          command: |
+            scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/test/mwontop-${TARGET_VERSION}.jar

@@ -27,10 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Thomas Pellissier Tanon
@@ -50,17 +47,18 @@ public class Configuration {
     }
 
     private static Configuration loadConfiguration() {
+        Properties properties = new Properties(System.getProperties());
         try {
             File basePath = new File(Configuration.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
             try(InputStream inputStream = new FileInputStream(new File(basePath,"config.properties"))) {
-                Properties properties = new Properties();
                 properties.load(inputStream);
                 return new Configuration(properties);
             }
         } catch (IOException | URISyntaxException e) {
             LOGGER.error(e.getMessage(), e);
-            System.exit(1);
-            return null;
+            LOGGER.warn( "Default properties should be specified as System properties!" );
+            //creating default properties with environment variables
+            return new Configuration( properties );
         }
     }
 
@@ -83,11 +81,5 @@ public class Configuration {
 
     public String getDatabasePassword() {
         return properties.getProperty("app.db.password");
-    }
-
-    public Set<String> getAllowedSites() {
-        return Arrays.stream(properties.getProperty("app.db.allowedSites", "enwiki").split(","))
-                .map(String::trim)
-                .collect(Collectors.toSet());
     }
 }
