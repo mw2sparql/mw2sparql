@@ -62,7 +62,6 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
         LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
@@ -77,7 +76,6 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertTrue( splitResult.length > 2 );
         LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
@@ -104,7 +102,6 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
         LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
@@ -119,7 +116,6 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
         assertEqualsWithoutEOL( "ns", splitResult[ 0 ] );
@@ -133,7 +129,6 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        LOGGER.info( "RESULT:\n" + result );
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
         LOGGER.info( "SPLIT RESULT 1:\n" + splitResult[ 0 ] );
