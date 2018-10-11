@@ -52,4 +52,4 @@ jobs:
           command: |
             ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "cp /data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar /data/project/mw2sparql/mwontop-${TARGET_VERSION}.old"
             scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar
-            ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "/data/project/mw2sparql/restart.sh > /data/project/mw2sparql/logs/restart.log"
+            ssh -t -v ${DEPLOY_USER}@login.tools.wmflabs.org "/data/project/mw2sparql/restart.sh > /data/project/mw2sparql/logs/restart.log"
