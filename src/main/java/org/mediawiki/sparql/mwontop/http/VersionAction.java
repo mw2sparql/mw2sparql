@@ -20,7 +20,8 @@ public class VersionAction {
     public Response get( @Context Request request ) {
         String buildDate = Configuration.getInstance().getProperty( "build.date" );
         String appVersion = Configuration.getInstance().getProperty( "application.version" );
+        String gitCommit = Configuration.getInstance().getProperty( "git.commit" );
 
-        return Response.ok( "Current version: " + appVersion + " from " + buildDate ).build();
+        return Response.ok( "Current version: " + appVersion + "( " + gitCommit + " ) from " + buildDate ).build();
     }
 }
