@@ -26,6 +26,7 @@
     <version>0.2-SNAPSHOT</version>
 
     <properties>
+        <git.commit>${CIRCLE_SHA1}</git.commit>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ontopVersion>3.0.0-beta-2</ontopVersion>
         <activationVersion>1.1.1</activationVersion>
@@ -34,6 +35,8 @@
         <jaxbVersion>2.3.0</jaxbVersion>
         <jerseyVersion>2.25.1</jerseyVersion>
         <mysqlVersion>5.1.41</mysqlVersion>
+        <build.timestamp>${maven.build.timestamp}</build.timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -85,6 +88,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
