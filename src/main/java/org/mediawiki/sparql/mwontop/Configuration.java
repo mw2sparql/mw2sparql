@@ -35,11 +35,11 @@ import java.util.Properties;
  */
 public class Configuration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger( Configuration.class );
     private static final Configuration INSTANCE = loadConfiguration();
     private Properties properties;
 
-    private Configuration(Properties properties) {
+    private Configuration( Properties properties ) {
         this.properties = properties;
     }
 
@@ -47,16 +47,26 @@ public class Configuration {
         return INSTANCE;
     }
 
+    private static Properties loadDefaultProperties() {
+        Properties properties = new Properties( System.getProperties() );
+        try ( InputStream input = Configuration.class.getClassLoader().getResourceAsStream( "application.properties" ) ) {
+            properties.load( input );
+        } catch ( IOException e ) {
+            LOGGER.error( e.getMessage() );
+        }
+        return properties;
+    }
+
     private static Configuration loadConfiguration() {
-        Properties properties = new Properties(System.getProperties());
+        Properties properties = loadDefaultProperties();
         try {
             URL location = Configuration.class.getProtectionDomain().getCodeSource().getLocation();
-            File basePath = new File( location.toURI()).getParentFile();
-            try(InputStream inputStream = new FileInputStream(new File(basePath,"config.properties"))) {
-                properties.load(inputStream);
-                return new Configuration(properties);
+            File basePath = new File( location.toURI() ).getParentFile();
+            try ( InputStream inputStream = new FileInputStream( new File( basePath, "config.properties" ) ) ) {
+                properties.load( inputStream );
+                return new Configuration( properties );
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch ( IOException | URISyntaxException e ) {
             LOGGER.error( e.getMessage() + ".\nDefault properties will be used!" );
             //creating default properties with environment variables
             return new Configuration( properties );
@@ -64,23 +74,27 @@ public class Configuration {
     }
 
     public URI getBaseURI() {
-        UriBuilder uriBuilder = UriBuilder.fromUri(properties.getProperty("app.http.baseURI"));
-        String port = System.getenv("PORT");
-        if (port != null) {
-            uriBuilder.port(Integer.valueOf(port));
+        UriBuilder uriBuilder = UriBuilder.fromUri( properties.getProperty( "app.http.baseURI" ) );
+        String port = System.getenv( "PORT" );
+        if ( port != null ) {
+            uriBuilder.port( Integer.valueOf( port ) );
         }
         return uriBuilder.build();
     }
 
     public String getDatabaseHost() {
-        return properties.getProperty("app.db.host");
+        return properties.getProperty( "app.db.host" );
     }
 
     public String getDatabaseUser() {
-        return properties.getProperty("app.db.user");
+        return properties.getProperty( "app.db.user" );
     }
 
     public String getDatabasePassword() {
-        return properties.getProperty("app.db.password");
+        return properties.getProperty( "app.db.password" );
+    }
+
+    public String getProperty( String key ) {
+        return properties.getProperty( key );
     }
 }
