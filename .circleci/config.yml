@@ -6,18 +6,11 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/openjdk:8-jdk
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
 
     working_directory: ~/repo
 
     environment:
-      # Customize the JVM maximum heap limit
       MAVEN_OPTS: -Xmx1024m -XX:MaxPermSize=256m
     
     steps:
@@ -47,9 +40,15 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-  
+
+      # Creates a backup of currently running server .jar and replaces it with newer version
       - deploy:
+          name: .jar upload
           command: |
             ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "cp /data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar /data/project/mw2sparql/mwontop-${TARGET_VERSION}.old"
             scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar
-            ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "bash -s /data/project/mw2sparql/restart.sh"
+
+      # Calls restart.sh on the remote server
+      - deploy:
+          name: Server restart
+          command: ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "become mw2sparql /data/project/mw2sparql/restart.sh"
