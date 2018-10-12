@@ -1,5 +1,6 @@
 package org.mediawiki.sparql.mwontop.http;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mediawiki.sparql.mwontop.Configuration;
 
 import javax.ws.rs.GET;
@@ -21,6 +22,11 @@ public class VersionAction {
         String buildDate = Configuration.getInstance().getProperty( "build.date" );
         String appVersion = Configuration.getInstance().getProperty( "application.version" );
         String gitCommit = Configuration.getInstance().getProperty( "git.commit" );
+
+        //short git commit version
+        if ( StringUtils.isNotBlank(gitCommit) && gitCommit.length() > 7 && !gitCommit.contains( "$" )) {
+            gitCommit = gitCommit.substring( 0, 7 );
+        }
 
         return Response.ok( "Current version: " + appVersion + "( " + gitCommit + " ) from " + buildDate ).build();
     }
