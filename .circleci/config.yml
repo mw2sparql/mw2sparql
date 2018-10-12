@@ -12,6 +12,7 @@ jobs:
 
     environment:
       MAVEN_OPTS: -Xmx1024m -XX:MaxPermSize=256m
+      SHORT_GIT_HASH: $(echo $CIRCLE_SHA1 | cut -c -7)
     
     steps:
 
