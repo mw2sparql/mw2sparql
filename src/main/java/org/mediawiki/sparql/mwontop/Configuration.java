@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -49,14 +50,14 @@ public class Configuration {
     private static Configuration loadConfiguration() {
         Properties properties = new Properties(System.getProperties());
         try {
-            File basePath = new File(Configuration.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+            URL location = Configuration.class.getProtectionDomain().getCodeSource().getLocation();
+            File basePath = new File( location.toURI()).getParentFile();
             try(InputStream inputStream = new FileInputStream(new File(basePath,"config.properties"))) {
                 properties.load(inputStream);
                 return new Configuration(properties);
             }
         } catch (IOException | URISyntaxException e) {
-            LOGGER.error(e.getMessage(), e);
-            LOGGER.warn( "Default properties should be specified as System properties!" );
+            LOGGER.error( e.getMessage() + ".\nDefault properties will be used!" );
             //creating default properties with environment variables
             return new Configuration( properties );
         }
