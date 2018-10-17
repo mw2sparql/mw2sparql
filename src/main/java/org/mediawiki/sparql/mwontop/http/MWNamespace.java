@@ -16,6 +16,7 @@
  */
 package org.mediawiki.sparql.mwontop.http;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mediawiki.sparql.mwontop.api.SiteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class MWNamespace {
+final class MWNamespace {
     private static final Logger LOGGER = LoggerFactory.getLogger(MWNamespace.class);
-    private static Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
-    private static Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:^>]*:)?([^>]+)");
+    private static final Map<String, Map<String, String>> NAMESPACES = new HashMap<>();
+    private static final Pattern NAMESPACE_URI_REGEX = Pattern.compile("//([^/]*)/wiki/([^:^>]*:)?([^>]+)");
 
     private static Map<String, String> getNamespaces(String projectHost) {
         if (!NAMESPACES.containsKey(projectHost)) {
@@ -71,31 +72,40 @@ class MWNamespace {
         StringBuffer buf = new StringBuffer();
         Matcher m = NAMESPACE_URI_REGEX.matcher(text);
         while (m.find()) {
-            String namespace = m.group(2) != null ? m.group(2).substring(0, m.group(2).length() - 1) : "";
+            String namespaceGroup = m.group( 2 );
+            String namespace = StringUtils.defaultIfBlank( namespaceGroup, "");
+            if (StringUtils.isNotBlank( namespace )) {
+                namespace = namespace.substring( 0, namespace.length() - 1 );
+            }
             String pageTitle = m.group(3);
             try {
+                String utfCharset = "UTF-8";
                 if (decodeTitles) {
-                    namespace = URLDecoder.decode(namespace, "UTF-8");
-                    pageTitle = URLDecoder.decode(pageTitle, "UTF-8")
+                    namespace = URLDecoder.decode(namespace, utfCharset );
+                    pageTitle = URLDecoder.decode(pageTitle, utfCharset )
                             .replace("`", "%60")
                             .replace("\"", "%22");
                 }
-                if (getNamespaces(m.group(1)).containsKey(namespace)) {
-                    namespace = getNamespaces(m.group(1)).get(namespace);
+                String baseUrl = m.group( 1 );
+                if (getNamespaces( baseUrl ).containsKey(namespace)) {
+                    namespace = getNamespaces( baseUrl ).get(namespace);
                 }
                 if (!decodeTitles) {
-                    namespace = URLEncoder.encode(namespace, "UTF-8");
-                    pageTitle = URLEncoder.encode(pageTitle, "UTF-8")
+                    namespace = URLEncoder.encode(namespace, utfCharset );
+                    pageTitle = URLEncoder.encode(pageTitle, utfCharset )
                             .replace("%28", "(")
                             .replace("%29", ")")
                             .replace("%2F", "/")
                             .replace("%3A", ":");
                 }
-            } catch (UnsupportedEncodingException ignored) {
+            } catch (UnsupportedEncodingException ex) {
+                //should not be thrown
+                throw new RuntimeException( ex );
             }
-            if (!namespace.isEmpty())
+            if (!namespace.isEmpty()) {
                 pageTitle = namespace + ':' + pageTitle;
-            m.appendReplacement(buf, text.substring(m.start(), m.group(2) != null ? m.start(2) : m.start(3)) +
+            }
+            m.appendReplacement(buf, text.substring(m.start(), namespaceGroup != null ? m.start(2) : m.start(3)) +
                     pageTitle + text.substring(m.end(3), m.end()));
         }
         m.appendTail(buf);
