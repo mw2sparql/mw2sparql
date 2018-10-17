@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author MZhavzharov.
  */
-public class SPARQLActionsTest extends SparqlBaseTest {
+public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
 
     private final String baseQueryPartForGet = "PREFIX rdf: %3Chttp://www.w3.org/1999/02/22-rdf-syntax-ns%23%3E PREFIX schema: %3Chttp://schema.org/%3E PREFIX mw: " +
             "%3Chttp://tools.wmflabs.org/mw2sparql/ontology%23%3E ";
@@ -126,6 +126,19 @@ public class SPARQLActionsTest extends SparqlBaseTest {
         assertEquals( 2, splitResult.length );
         assertEqualsWithoutEOL( "class", splitResult[ 0 ] );
         assertEqualsWithoutEOL( "http://tools.wmflabs.org/mw2sparql/ontology#Page", splitResult[ 1 ] );
+    }
+
+    @Test
+    public void shouldResponseContainingApostrophe() {
+        String query = "SELECT * %7B%3Chttps://fr.wikipedia.org/wiki/%60Anizzah%3E mw:includesPage ?object%7D";
+
+        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
+        assertEquals( 200, response.getStatus() );
+        String result = response.readEntity( String.class );
+        String[] splitResult = result.split( System.lineSeparator() );
+        assertTrue( splitResult.length > 1 );
+        assertEqualsWithoutEOL( "object", splitResult[ 0 ] );
+        assertTrue( splitResult[ 1 ].contains( "https://fr.wikipedia.org" ) );
     }
 
     @Test

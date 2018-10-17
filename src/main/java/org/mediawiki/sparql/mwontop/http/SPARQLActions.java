@@ -21,7 +21,9 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLUtil;
 import org.eclipse.rdf4j.query.resultio.*;
+import org.eclipse.rdf4j.queryrender.RenderUtils;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -54,7 +56,7 @@ public class SPARQLActions {
         if (query == null) {
             throw new BadRequestException("You should set a SPARQL query using the 'query' URL query parameter");
         }
-        return executeQuery(query, null, request);
+        return executeQuery(query, request);
     }
 
     @POST
@@ -63,16 +65,16 @@ public class SPARQLActions {
         if (query == null) {
             throw new BadRequestException("You should POST a SPARQL query with the application/sparql-query content type");
         }
-        return executeQuery(query, null, request);
+        return executeQuery(query, request);
     }
 
     @POST
     @Consumes("application/sparql-query")
     public Response postDirect(String query, @Context Request request) {
-        return executeQuery(query, null, request);
+        return executeQuery(query, request);
     }
 
-    private Response executeQuery(String queryString, String baseIRI, Request request) {
+    private Response executeQuery(String queryString, Request request) {
         try (RepositoryConnection repositoryConnection = REPOSITORY.getConnection()) {
             Query query = repositoryConnection.prepareQuery(QueryLanguage.SPARQL, mutateNamespace(queryString, true));
             if (query instanceof BooleanQuery) {
