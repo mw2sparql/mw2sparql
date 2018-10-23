@@ -94,7 +94,6 @@ final class MWNamespace {
                     namespace = URLEncoder.encode(namespace, utfCharset );
                     pageTitle = URLEncoder.encode(pageTitle, utfCharset )
                             .replace("%21", "!")
-                            .replace("%24", "$")
                             .replace("%28", "(")
                             .replace("%29", ")")
                             .replace("%2C", ",")
