@@ -12,16 +12,16 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author MZhavzharov.
  */
 public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
 
-    private final String baseQueryPartForGet = "PREFIX rdf: %3Chttp://www.w3.org/1999/02/22-rdf-syntax-ns%23%3E PREFIX schema: %3Chttp://schema.org/%3E PREFIX mw: " +
-            "%3Chttp://tools.wmflabs.org/mw2sparql/ontology%23%3E ";
+    private final String baseQueryPartForGet = encodeUrl( "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> " +
+            "PREFIX mw: <http://tools.wmflabs.org/mw2sparql/ontology#> " );
+
     private final String baseQueryPartForPost = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> PREFIX mw: <http://tools.wmflabs" +
             ".org/mw2sparql/ontology#> ";
 
@@ -41,10 +41,10 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         assertEquals( 400, response.getStatus() );
     }
 
-    @Test()
+    @Test
     public void shouldResponseWithTrueOnAskQuery() {
         //ASK for fr-category with url-encoded umlauts:
-        String query = "ASK %7B%3Chttps://fr.wikipedia.org/wiki/Cat%C3%A9gorie:Langage_de_requ%C3%AAte%3E ?predicate ?object%7D";
+        String query = encodeUrl( "ASK {<https://fr.wikipedia.org/wiki/Catégorie:Langage_de_requête> ?predicate ?object}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -54,7 +54,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithLinkAndCategoryRu() {
         //Reverse category lookup for ruwikisource-category
-        String query = "SELECT * %7B?object ?predicate %3Chttps://ru.wikisource.org/wiki/Категория:ЕЭБЕ:Перенаправления%3E%7D";
+        String query = encodeUrl( "SELECT * {?object ?predicate <https://ru.wikisource.org/wiki/Категория:ЕЭБЕ:Перенаправления>}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -67,7 +67,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithInnerLinksFr() {
         //Outbound links for fr-template with non-encoded umlaut:
-        String query = "SELECT * %7B%3Chttps://fr.wikipedia.org/wiki/Mod%C3%A8le:Infobox_Galaxie%3E mw:internalLinkTo ?object%7D";
+        String query = encodeUrl( "SELECT * {<https://fr.wikipedia.org/wiki/Modèle:Infobox_Galaxie> mw:internalLinkTo ?object}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -80,7 +80,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithWikidataLinksLimitBy10000() {
         //10000 usages of ru-wiki module:
-        String query = "SELECT * %7B?page mw:includesPage %3Chttps://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D0%B4%D1%83%D0%BB%D1%8C:Wikidata%3E%7D LIMIT 10000";
+        String query = encodeUrl( "SELECT * {?page mw:includesPage <https://ru.wikipedia.org/wiki/Модуль:Wikidata>} LIMIT 10000" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -92,7 +92,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithPageNameDe() {
         //Name of the page in non-default namespace of de-wiki
-        String query = "SELECT * %7B%3Chttps://de.wikipedia.org/wiki/Wikipedia:Hauptseite%3E schema:name ?page%7D";
+        String query = encodeUrl( "SELECT * {<https://de.wikipedia.org/wiki/Wikipedia:Hauptseite> schema:name ?page}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -105,7 +105,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithNamespaceIdZh() {
         //Namespace id of zh-wiki talk page:
-        String query = "SELECT * %7B%3Chttps://zh.wikipedia.org/wiki/Talk:%E5%9C%8B%E7%AB%8B%E5%AE%9C%E8%98%AD%E9%AB%98%E7%B4%9A%E4%B8%AD%E5%AD%B8%3E mw:pageNamespaceId ?ns%7D";
+        String query = encodeUrl( "SELECT * {<https://zh.wikipedia.org/wiki/Talk:國立宜蘭高級中學> mw:pageNamespaceId ?ns}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -118,7 +118,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
     @Test
     public void shouldResponseWithPageClassEn() {
         //Class for page in enwiki-specific namespace:
-        String query = "SELECT * %7B%3Chttps://en.wikipedia.org/wiki/TimedText:Raelsample.ogg.fr.srt%3E rdf:type ?class%7D";
+        String query = encodeUrl( "SELECT * {<https://en.wikipedia.org/wiki/TimedText:Raelsample.ogg.fr.srt> rdf:type ?class}" );
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
@@ -130,7 +130,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
 
     @Test
     public void shouldResponseContainingApostrophe() {
-        String query = "SELECT * %7B%3Chttps://fr.wikipedia.org/wiki/%60Anizzah%3E mw:includesPage ?object%7D";
+        String query = encodeUrl( "SELECT * {<https://fr.wikipedia.org/wiki/`Anizzah> mw:includesPage ?object}" );
 
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
@@ -140,6 +140,40 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         assertEqualsWithoutEOL( "object", splitResult[ 0 ] );
         assertTrue( splitResult[ 1 ].contains( "https://fr.wikipedia.org" ) );
     }
+
+    @Test
+    public void shouldSkipFilteredDomain() {
+        String query = encodeUrl( "SELECT * {<https://meta.wikimedia.org/wiki/Category:Wikimedia_Foundation_staff> mw:includesPage ?object}" );
+
+        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
+        assertEquals( 200, response.getStatus() );
+        String result = response.readEntity( String.class );
+        String[] splitResult = result.split( System.lineSeparator() );
+        assertEquals( 1, splitResult.length );
+        assertEqualsWithoutEOL( "object", splitResult[ 0 ] );
+    }
+
+    @Test
+    public void shouldSkipFilteredDomainInBatch() {
+        String query = encodeUrl( "SELECT ?article ?catArticle " +
+                "WHERE { SELECT * { ?article mw:inCategory ?catArticle } }" +
+                "VALUES ( ?catArticle) {" +
+                "(<https://zh.wikiquote.org/wiki/Category:維基人>)" +
+                "(<https://meta.wikimedia.org/wiki/Category:Wikimedia_Foundation_staff>)" +
+                "(<https://nov.wikipedia.org/wiki/Category:Wikimedia_Foundation_staff>)" +
+                "}" );
+
+        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
+        assertEquals( 200, response.getStatus() );
+        String result = response.readEntity( String.class );
+        String[] splitResult = result.split( System.lineSeparator(), 2 );
+        assertTrue( splitResult.length > 1 );
+        assertEqualsWithoutEOL( "catArticle,article", splitResult[ 0 ] );
+        assertFalse( result.contains( "meta.wikimedia.org" ) );
+        assertTrue( result.contains( "zh.wikiquote.org" ) );
+        assertTrue( result.contains( "nov.wikipedia.org" ) );
+    }
+
 
     @Test
     public void shouldReturnBadRequestWithoutQueryPost() {

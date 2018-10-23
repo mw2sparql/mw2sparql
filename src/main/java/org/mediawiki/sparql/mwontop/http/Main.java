@@ -55,7 +55,7 @@ public class Main extends ResourceConfig {
     }
 
     private static HttpServer startServer() {
-        URI baseURI = Configuration.getInstance().getBaseURI();
+        URI baseURI = Configuration.instance().getBaseURI();
         LOGGER.info("Starting server at: " + baseURI.toString());
         return JdkHttpServerFactory.createHttpServer(baseURI, new Main());
     }

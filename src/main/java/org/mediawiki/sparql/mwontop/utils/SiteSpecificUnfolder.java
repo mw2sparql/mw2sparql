@@ -1,5 +1,6 @@
 package org.mediawiki.sparql.mwontop.utils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
@@ -20,141 +21,154 @@ import it.unibz.inf.ontop.iq.tools.RootConstructionNodeEnforcer;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 class SiteSpecificUnfolder implements QueryUnfolder {
     private final Mapping mapping;
     private final RootConstructionNodeEnforcer rootCnEnforcer;
 
     @AssistedInject
-    private SiteSpecificUnfolder(@Assisted Mapping mapping, RootConstructionNodeEnforcer rootCnEnforcer) {
+    private SiteSpecificUnfolder( @Assisted Mapping mapping, RootConstructionNodeEnforcer rootCnEnforcer ) {
         this.mapping = mapping;
         this.rootCnEnforcer = rootCnEnforcer;
     }
 
+    @NonNull
     @Override
-    public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+    public IntermediateQuery optimize( IntermediateQuery query ) throws EmptyQueryException {
         IntermediateQuery newQuery = null;
         String cachedSite = null;
 
         Optional<IntensionalDataNode> optionalCurrentIntentionalNode = query.getIntensionalNodes().findFirst();
-        while (optionalCurrentIntentionalNode.isPresent()) {
+        while ( optionalCurrentIntentionalNode.isPresent() ) {
 
             IntensionalDataNode intentionalNode = optionalCurrentIntentionalNode.get();
 
             Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
-                    intentionalNode.getProjectionAtom().getPredicate());
+                    intentionalNode.getProjectionAtom().getPredicate() );
 
-            if (optionalMappingAssertion.isPresent()) {
-                String siteLink = null;
-                for (int i = 0; i < intentionalNode.getProjectionAtom().getArity(); i++) {
-                    if (intentionalNode.getProjectionAtom().getTerm(i) instanceof GroundFunctionalTerm) {
-                        String firstTermValue = ((GroundFunctionalTerm) intentionalNode.getProjectionAtom().getTerm(i)).getTerm(0).toString();
-                        if (firstTermValue.contains("/wiki/mw")) siteLink = firstTermValue;
-                    }
-                }
-                if (siteLink != null) {
-                    if (!siteLink.equals(cachedSite)) {
+            if ( optionalMappingAssertion.isPresent() ) {
+                Optional<String> domainTerm = intentionalNode.getProjectionAtom().getArguments().stream()
+                        .filter( GroundFunctionalTerm.class::isInstance )
+                        .map( GroundFunctionalTerm.class::cast )
+                        .map( t -> t.getTerm( 0 ).toString() )
+                        .filter( t -> t.contains( "/wiki/mw" ) )
+                        .findFirst();
+
+                if ( domainTerm.isPresent() ) {
+                    String siteLink = domainTerm.get();
+                    if ( !siteLink.equals( cachedSite ) ) {
                         IntermediateQuery modelQuery = optionalMappingAssertion.get();
-                        HashSet<QueryNode> constructionNodesForSite = getApplicableMappings(siteLink, modelQuery);
-                        QueryNode rootNode = modelQuery.getRootNode();
-                        if (constructionNodesForSite.size() == 1) rootNode = constructionNodesForSite.iterator().next();
+                        final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery );
+                        if ( !constructionNodesForSite.isEmpty() ) {
+                            QueryNode rootNode = modelQuery.getRootNode();
+                            if ( constructionNodesForSite.size() == 1 ) {
+                                rootNode = constructionNodesForSite.iterator().next();
+                            }
 
-                        DefaultTree root = new DefaultTree(rootNode) {
-                        };
-                        QueryTreeComponent tree = new DefaultQueryTreeComponent(root) {
-                            {
-                                if (constructionNodesForSite.size() == 1) {
-                                    QueryNode join = modelQuery.getChildren(this.getRootNode()).get(0);
-                                    this.addChild(this.getRootNode(), join, Optional.empty(), false);
-                                    for (QueryNode ext : modelQuery.getChildren(join)) {
-                                        this.addChild(join, ext, Optional.empty(), false);
-                                    }
-                                } else {
-                                    for (QueryNode constr : constructionNodesForSite) {
-                                        this.addChild(this.getRootNode(), constr, Optional.empty(), false);
-                                        QueryNode join = modelQuery.getChildren(constr).get(0);
-                                        this.addChild(constr, join, Optional.empty(), false);
-                                        for (QueryNode ext : modelQuery.getChildren(join)) {
-                                            this.addChild(join, ext, Optional.empty(), false);
+                            DefaultTree root = new DefaultTree( rootNode ) {
+                            };
+                            QueryTreeComponent tree = new DefaultQueryTreeComponent( root ) {
+                                {
+                                    if ( constructionNodesForSite.size() == 1 ) {
+                                        QueryNode join = modelQuery.getChildren( this.getRootNode() ).get( 0 );
+                                        this.addChild( this.getRootNode(), join, Optional.empty(), false );
+                                        for ( QueryNode ext : modelQuery.getChildren( join ) ) {
+                                            this.addChild( join, ext, Optional.empty(), false );
+                                        }
+                                    } else {
+                                        for ( QueryNode constr : constructionNodesForSite ) {
+                                            this.addChild( this.getRootNode(), constr, Optional.empty(), false );
+                                            QueryNode join = modelQuery.getChildren( constr ).get( 0 );
+                                            this.addChild( constr, join, Optional.empty(), false );
+                                            for ( QueryNode ext : modelQuery.getChildren( join ) ) {
+                                                this.addChild( join, ext, Optional.empty(), false );
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        };
+                            };
 
-                        newQuery = new IntermediateQueryImpl(
-                                modelQuery.getDBMetadata(),
-                                modelQuery.getProjectionAtom(),
-                                tree,
-                                modelQuery.getExecutorRegistry(),
-                                null,
-                                new OntopModelSettings() {
-                                    @Override
-                                    public CardinalityPreservationMode getCardinalityPreservationMode() {
-                                        return null;
-                                    }
+                            newQuery = new IntermediateQueryImpl(
+                                    modelQuery.getDBMetadata(),
+                                    modelQuery.getProjectionAtom(),
+                                    tree,
+                                    modelQuery.getExecutorRegistry(),
+                                    null,
+                                    new OntopModelSettings() {
+                                        @Override
+                                        public CardinalityPreservationMode getCardinalityPreservationMode() {
+                                            return null;
+                                        }
 
-                                    public boolean isTestModeEnabled() {
-                                        return false;
-                                    }
+                                        public boolean isTestModeEnabled() {
+                                            return false;
+                                        }
 
-                                    @Override
-                                    public Optional<String> getProperty(String s) {
-                                        return Optional.empty();
-                                    }
+                                        @Override
+                                        public Optional<String> getProperty( String s ) {
+                                            return Optional.empty();
+                                        }
 
-                                    @Override
-                                    public boolean contains(Object o) {
-                                        return false;
-                                    }
-                                },
-                                modelQuery.getFactory()
+                                        @Override
+                                        public boolean contains( Object o ) {
+                                            return false;
+                                        }
+                                    },
+                                    modelQuery.getFactory()
 
-                        );
-                        cachedSite = siteLink;
+                            );
+                            cachedSite = siteLink;
+                        }
                     }
-                    optionalMappingAssertion = Optional.of(newQuery);
+                    optionalMappingAssertion = Optional.ofNullable( newQuery );
                 }
             }
 
-            query = rootCnEnforcer.enforceRootCn(query);
-            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intentionalNode, optionalMappingAssertion);
-            query.applyProposal(queryMerging);
+            query = rootCnEnforcer.enforceRootCn( query );
+            QueryMergingProposal queryMerging = new QueryMergingProposalImpl( intentionalNode, optionalMappingAssertion );
+            query.applyProposal( queryMerging );
 
             optionalCurrentIntentionalNode = query.getIntensionalNodes().findFirst();
         }
 
-        return new TrueNodesRemovalOptimizer().optimize(query);
+        return new TrueNodesRemovalOptimizer().optimize( query );
     }
 
-    private HashSet<QueryNode> getApplicableMappings(String siteLink, IntermediateQuery modelQuery) {
+    @NonNull
+    private HashSet<QueryNode> getApplicableMappings( @NonNull String siteLink, @NonNull IntermediateQuery modelQuery ) {
         HashSet<QueryNode> constructionNodesForSidelines = new HashSet<>();
 
-        for (QueryNode node : modelQuery.getNodesInTopDownOrder()) {
-            if (node instanceof ConstructionNodeImpl) {
-                ImmutableSubstitution<ImmutableTerm> subsList = ((ConstructionNodeImpl) node).getSubstitution();
-                for (Variable k : subsList.getDomain()) {
-                    ImmutableTerm v = subsList.get(k);
-                    if (v instanceof NonGroundFunctionalTerm) {
-                        ImmutableTerm t = ((NonGroundFunctionalTerm) v).getTerm(0);
-                        if (t instanceof ValueConstantImpl) {
-                            if (siteLink.contains(((ValueConstantImpl) t).getValue())) {
-                                Optional<QueryNode> firstChild = modelQuery.getFirstChild(node);
-                                if (firstChild.isPresent())
-                                    constructionNodesForSidelines.add(node);
-                            }
-                        }
-                    }
-                }
-            }
+        ImmutableList<QueryNode> nodesInTopDownOrder = modelQuery.getNodesInTopDownOrder();
+        if ( nodesInTopDownOrder != null ) {
+            nodesInTopDownOrder.stream()
+                    .filter( ConstructionNodeImpl.class::isInstance )
+                    .map( ConstructionNodeImpl.class::cast )
+                    .filter( node -> filterNode( node, siteLink ) )
+                    .filter( node -> modelQuery.getFirstChild( node ).isPresent() )
+                    .forEach( constructionNodesForSidelines::add );
         }
         return constructionNodesForSidelines;
+    }
+
+    private boolean filterNode( @NonNull ConstructionNodeImpl node, @NonNull String siteLink ) {
+        ImmutableSubstitution<ImmutableTerm> substitution = node.getSubstitution();
+        if (substitution == null) {
+            return false;
+        }
+        return substitution.getImmutableMap().values().stream()
+                .filter( NonGroundFunctionalTerm.class::isInstance )
+                .map( NonGroundFunctionalTerm.class::cast )
+                .map( v -> v.getTerm( 0 ) )
+                .filter( ValueConstantImpl.class::isInstance )
+                .map( ValueConstantImpl.class::cast )
+                .anyMatch( t -> siteLink.contains( t.getValue() ) );
     }
 }
