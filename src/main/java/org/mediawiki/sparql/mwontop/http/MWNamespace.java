@@ -93,10 +93,13 @@ final class MWNamespace {
                 if (!decodeTitles) {
                     namespace = URLEncoder.encode(namespace, utfCharset );
                     pageTitle = URLEncoder.encode(pageTitle, utfCharset )
+                            .replace("%21", "!")
                             .replace("%28", "(")
                             .replace("%29", ")")
+                            .replace("%2C", ",")
                             .replace("%2F", "/")
-                            .replace("%3A", ":");
+                            .replace("%3A", ":")
+                            .replace("%3B", ";");
                 }
             } catch (UnsupportedEncodingException ex) {
                 //should not be thrown

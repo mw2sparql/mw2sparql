@@ -1,4 +1,4 @@
-MW2SPARQL
+MW2SPARQL [![CircleCI](https://circleci.com/gh/mw2sparql/mw2sparql.svg?style=svg)](https://circleci.com/gh/mw2sparql/mw2sparql)
 =========
 
 This repository contains the code of a [Wikimedia Tools Labs](https://tools.wmflabs.org) tool allowing to query [Wikimedia Wikis SQL database](https://www.mediawiki.org/wiki/Database) using SPARQL.
