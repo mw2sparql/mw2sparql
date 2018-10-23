@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.Repository;
@@ -30,25 +31,31 @@ import org.mediawiki.sparql.mwontop.utils.InternalFilesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * @author Thomas Pellissier Tanon
  */
-public class RepositoryFactory {
+public final class RepositoryFactory {
+    @NonNull
     private static final Logger LOGGER = LoggerFactory.getLogger( RepositoryFactory.class );
+    @NonNull
     private static final RepositoryFactory INSTANCE = new RepositoryFactory();
+
 
     private Repository repository;
 
     public static RepositoryFactory getInstance() {
         return INSTANCE;
+    }
+
+    private RepositoryFactory() {
+        //simple instance creation protection
     }
 
     public void initializeRepository() throws Exception {
@@ -59,8 +66,9 @@ public class RepositoryFactory {
         return repository;
     }
 
+    @NonNull
     private MySQLConnectionInformation connectionInformationForSiteId() {
-        Configuration configuration = Configuration.getInstance();
+        Configuration configuration = Configuration.instance();
         return new MySQLConnectionInformation(
                 configuration.getDatabaseHost(),
                 "meta_p",
@@ -69,7 +77,8 @@ public class RepositoryFactory {
         );
     }
 
-    private Repository buildVirtualRepository( MySQLConnectionInformation connectionInformation ) throws Exception {
+    @NonNull
+    private Repository buildVirtualRepository( @NonNull MySQLConnectionInformation connectionInformation ) throws Exception {
         List<SiteConfig> sitesConfig = loadSitesConfig( connectionInformation );
 
         Model rdfMapping = new LinkedHashModel();
@@ -100,7 +109,7 @@ public class RepositoryFactory {
         return repository;
     }
 
-    private Model loadRDFMappingModelForSite( SiteConfig siteConfig, String mappingTemplate ) throws Exception {
+    private Model loadRDFMappingModelForSite( @NonNull SiteConfig siteConfig, @NonNull String mappingTemplate ) throws IOException {
         return InternalFilesManager.parseTurtle(
                 mappingTemplate
                         .replace( "{lang}", siteConfig.getLanguageCode() )
@@ -110,26 +119,49 @@ public class RepositoryFactory {
         );
     }
 
-    private List<SiteConfig> loadSitesConfig( MySQLConnectionInformation connectionInformation ) throws Exception {
+    @NonNull
+    private List<SiteConfig> loadSitesConfig( @NonNull MySQLConnectionInformation connectionInformation ) throws SQLException {
         LOGGER.debug( "Retriving sites configuration" );
-        try ( Connection connection = connectionInformation.createConnection() ) {
-            try ( ResultSet resultSet = connection.createStatement().executeQuery(
-                    "SELECT * FROM wiki WHERE NOT family IN ('wikimedia', 'wikimania', 'special', 'wikidata') OR dbname IN ('commonswiki', 'specieswiki')" ) ) {
-                List<SiteConfig> siteConfig = new ArrayList<>();
-                while ( resultSet.next() ) {
-                    siteConfig.add( new SiteConfig(
-                            resultSet.getString( "dbname" ),
-                            resultSet.getString( "lang" ),
-                            resultSet.getString( "url" )
-                    ) );
-                }
-                LOGGER.debug( siteConfig.size() + " sites retrived" );
-                return siteConfig;
+        try ( Connection connection = connectionInformation.createConnection();
+              PreparedStatement statement = prepareSiteConfigStatement( connection );
+              ResultSet resultSet = statement.executeQuery() ) {
+            List<SiteConfig> siteConfig = new ArrayList<>();
+            while ( resultSet.next() ) {
+                siteConfig.add( new SiteConfig(
+                        resultSet.getString( "dbname" ),
+                        resultSet.getString( "lang" ),
+                        resultSet.getString( "url" )
+                ) );
             }
+            LOGGER.debug( siteConfig.size() + " sites retrived" );
+            return siteConfig;
         }
     }
 
-    private DBMetadata loadDBMetadata( MySQLConnectionInformation connectionInformation, List<SiteConfig> sitesConfig ) throws SQLException {
+    @NonNull
+    private PreparedStatement prepareSiteConfigStatement( @NonNull Connection connection ) throws SQLException {
+
+        Configuration conf = Configuration.instance();
+        List<String> filteredFamilies = conf.getFilteredWikiFamilies();
+        List<String> filteredDBNames = conf.getFilteredWikiDBNames();
+
+        String familiesIndexes = String.join( ",", Collections.nCopies( filteredFamilies.size(), "?" ) );
+        String dbNamesIndexes = String.join( ",", Collections.nCopies( filteredDBNames.size(), "?" ) );
+
+        String sql = "SELECT * FROM wiki WHERE NOT family IN (" + familiesIndexes + ") OR dbname IN ( " + dbNamesIndexes + ")";
+        PreparedStatement ps = connection.prepareStatement( sql );
+        int parameterIndex = 1;
+        for ( String filteredFamily : filteredFamilies ) {
+            ps.setString( parameterIndex++, filteredFamily );
+        }
+        for ( String filteredDBName : filteredDBNames ) {
+            ps.setString( parameterIndex++, filteredDBName );
+        }
+        return ps;
+    }
+
+    @NonNull
+    private DBMetadata loadDBMetadata( @NonNull MySQLConnectionInformation connectionInformation, @NonNull List<SiteConfig> sitesConfig ) throws SQLException {
         RDBMetadata dbMetadata;
         try ( Connection connection = connectionInformation.withDatabase().createConnection() ) {
             dbMetadata = RDBMetadataExtractionTools.createMetadata( connection );

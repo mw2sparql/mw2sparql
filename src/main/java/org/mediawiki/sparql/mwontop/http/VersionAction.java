@@ -19,10 +19,12 @@ public class VersionAction {
 
     @GET
     public Response get( @Context Request request ) {
-        String buildDate = Configuration.getInstance().getProperty( "build.date" );
-        String appVersion = Configuration.getInstance().getProperty( "application.version" );
-        String gitCommit = Configuration.getInstance().getProperty( "git.commit" );
+        Configuration instance = Configuration.instance();
+        String buildDate = instance.getProperty( "build.date" );
+        String appVersion = instance.getProperty( "application.version" );
+        String gitCommit = instance.getProperty( "git.commit" );
 
+        //short git commit version
         //short git commit version
         if ( StringUtils.isNotBlank(gitCommit) && gitCommit.length() > 7 && !gitCommit.contains( "$" )) {
             gitCommit = gitCommit.substring( 0, 7 );
