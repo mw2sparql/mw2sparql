@@ -62,74 +62,77 @@ class SiteSpecificUnfolder implements QueryUnfolder {
                         .filter( t -> t.contains( "/wiki/mw" ) )
                         .findFirst();
 
-                if ( domainTerm.isPresent() ) {
-                    String siteLink = domainTerm.get();
-                    if ( !siteLink.equals( cachedSite ) ) {
-                        IntermediateQuery modelQuery = optionalMappingAssertion.get();
-                        final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery );
-                        if ( !constructionNodesForSite.isEmpty() ) {
-                            QueryNode rootNode = modelQuery.getRootNode();
-                            if ( constructionNodesForSite.size() == 1 ) {
-                                rootNode = constructionNodesForSite.iterator().next();
-                            }
+                // we should define default domain anyway, as we can't fetch data from over then 800 db's because of TimeoutException:
+                if ( !domainTerm.isPresent() ) {
+                    domainTerm = Optional.of( "https://en.wikipedia.org" );
+                }
 
-                            DefaultTree root = new DefaultTree( rootNode ) {
-                            };
-                            QueryTreeComponent tree = new DefaultQueryTreeComponent( root ) {
-                                {
-                                    if ( constructionNodesForSite.size() == 1 ) {
-                                        QueryNode join = modelQuery.getChildren( this.getRootNode() ).get( 0 );
-                                        this.addChild( this.getRootNode(), join, Optional.empty(), false );
+                String siteLink = domainTerm.get();
+                if ( !siteLink.equals( cachedSite ) ) {
+                    IntermediateQuery modelQuery = optionalMappingAssertion.get();
+                    final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery );
+                    if ( !constructionNodesForSite.isEmpty() ) {
+                        QueryNode rootNode = modelQuery.getRootNode();
+                        if ( constructionNodesForSite.size() == 1 ) {
+                            rootNode = constructionNodesForSite.iterator().next();
+                        }
+
+                        DefaultTree root = new DefaultTree( rootNode ) {
+                        };
+                        QueryTreeComponent tree = new DefaultQueryTreeComponent( root ) {
+                            {
+                                if ( constructionNodesForSite.size() == 1 ) {
+                                    QueryNode join = modelQuery.getChildren( this.getRootNode() ).get( 0 );
+                                    this.addChild( this.getRootNode(), join, Optional.empty(), false );
+                                    for ( QueryNode ext : modelQuery.getChildren( join ) ) {
+                                        this.addChild( join, ext, Optional.empty(), false );
+                                    }
+                                } else {
+                                    for ( QueryNode constr : constructionNodesForSite ) {
+                                        this.addChild( this.getRootNode(), constr, Optional.empty(), false );
+                                        QueryNode join = modelQuery.getChildren( constr ).get( 0 );
+                                        this.addChild( constr, join, Optional.empty(), false );
                                         for ( QueryNode ext : modelQuery.getChildren( join ) ) {
                                             this.addChild( join, ext, Optional.empty(), false );
                                         }
-                                    } else {
-                                        for ( QueryNode constr : constructionNodesForSite ) {
-                                            this.addChild( this.getRootNode(), constr, Optional.empty(), false );
-                                            QueryNode join = modelQuery.getChildren( constr ).get( 0 );
-                                            this.addChild( constr, join, Optional.empty(), false );
-                                            for ( QueryNode ext : modelQuery.getChildren( join ) ) {
-                                                this.addChild( join, ext, Optional.empty(), false );
-                                            }
-                                        }
                                     }
                                 }
-                            };
+                            }
+                        };
 
-                            newQuery = new IntermediateQueryImpl(
-                                    modelQuery.getDBMetadata(),
-                                    modelQuery.getProjectionAtom(),
-                                    tree,
-                                    modelQuery.getExecutorRegistry(),
-                                    null,
-                                    new OntopModelSettings() {
-                                        @Override
-                                        public CardinalityPreservationMode getCardinalityPreservationMode() {
-                                            return null;
-                                        }
+                        newQuery = new IntermediateQueryImpl(
+                                modelQuery.getDBMetadata(),
+                                modelQuery.getProjectionAtom(),
+                                tree,
+                                modelQuery.getExecutorRegistry(),
+                                null,
+                                new OntopModelSettings() {
+                                    @Override
+                                    public CardinalityPreservationMode getCardinalityPreservationMode() {
+                                        return null;
+                                    }
 
-                                        public boolean isTestModeEnabled() {
-                                            return false;
-                                        }
+                                    public boolean isTestModeEnabled() {
+                                        return false;
+                                    }
 
-                                        @Override
-                                        public Optional<String> getProperty( String s ) {
-                                            return Optional.empty();
-                                        }
+                                    @Override
+                                    public Optional<String> getProperty( String s ) {
+                                        return Optional.empty();
+                                    }
 
-                                        @Override
-                                        public boolean contains( Object o ) {
-                                            return false;
-                                        }
-                                    },
-                                    modelQuery.getFactory()
+                                    @Override
+                                    public boolean contains( Object o ) {
+                                        return false;
+                                    }
+                                },
+                                modelQuery.getFactory()
 
-                            );
-                            cachedSite = siteLink;
-                        }
+                        );
+                        cachedSite = siteLink;
                     }
-                    optionalMappingAssertion = Optional.ofNullable( newQuery );
                 }
+                optionalMappingAssertion = Optional.ofNullable( newQuery );
             }
 
             query = rootCnEnforcer.enforceRootCn( query );
@@ -160,7 +163,7 @@ class SiteSpecificUnfolder implements QueryUnfolder {
 
     private boolean filterNode( @NonNull ConstructionNodeImpl node, @NonNull String siteLink ) {
         ImmutableSubstitution<ImmutableTerm> substitution = node.getSubstitution();
-        if (substitution == null) {
+        if ( substitution == null ) {
             return false;
         }
         return substitution.getImmutableMap().values().stream()

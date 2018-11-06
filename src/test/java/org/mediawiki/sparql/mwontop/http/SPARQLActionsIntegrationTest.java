@@ -174,6 +174,16 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         assertTrue( result.contains( "nov.wikipedia.org" ) );
     }
 
+    @Test
+    public void shouldResponseWithDefaultEnWikipediaOrgDomainSubstitution() {
+        String query = encodeUrl( "SELECT ?a ?b ?c WHERE { ?a ?b ?c } LIMIT 1");
+
+        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
+        assertEquals( 200, response.getStatus() );
+        String result = response.readEntity( String.class );
+        String[] splitResult = result.split( System.lineSeparator(), 2 );
+        assertEqualsWithoutEOL( "a,b,c", splitResult[0] );
+    }
 
     @Test
     public void shouldReturnBadRequestWithoutQueryPost() {
