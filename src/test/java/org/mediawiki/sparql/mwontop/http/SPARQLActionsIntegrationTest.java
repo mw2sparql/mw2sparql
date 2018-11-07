@@ -181,8 +181,9 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
         assertEquals( 200, response.getStatus() );
         String result = response.readEntity( String.class );
-        String[] splitResult = result.split( System.lineSeparator(), 2 );
+        String[] splitResult = result.split( System.lineSeparator());
         assertEqualsWithoutEOL( "a,b,c", splitResult[0] );
+        assertTrue( splitResult[ 1 ].contains( "https://en.wikipedia.org" ) );
     }
 
     @Test
