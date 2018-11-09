@@ -48,9 +48,11 @@ class SiteSpecificUnfolder implements QueryUnfolder {
         IntermediateQuery newQuery = null;
         String cachedSite = null;
 
+        boolean noDomain = true;
         Optional<IntensionalDataNode> optionalCurrentIntentionalNode = query.getIntensionalNodes().findFirst();
         while ( optionalCurrentIntentionalNode.isPresent() ) {
 
+            long leftNodesCount = query.getIntensionalNodes().count();
             IntensionalDataNode intentionalNode = optionalCurrentIntentionalNode.get();
 
             Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
@@ -64,80 +66,81 @@ class SiteSpecificUnfolder implements QueryUnfolder {
                         .filter( t -> t.contains( "/wiki/mw" ) )
                         .findFirst();
 
-                boolean noDomain = false;
-                // we should define default domain anyway, as we can't fetch data from over then 800 db's because of TimeoutException:
-                if ( !domainTerm.isPresent() ) {
-                    noDomain = true;
+                // we should define default domain at least for one node anyway, as we can't fetch data from over then 800 db's because of TimeoutException:
+                boolean useDefaultDomain = !domainTerm.isPresent() && ( leftNodesCount == 1 ) && noDomain;
+                if ( useDefaultDomain ) {
                     domainTerm = Optional.of( DEFAULT_DOMAIN_FOR_QUERY );
                 }
 
-                String siteLink = domainTerm.get();
-                if ( !siteLink.equals( cachedSite ) ) {
-                    IntermediateQuery modelQuery = optionalMappingAssertion.get();
-                    final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery, noDomain );
-                    if ( !constructionNodesForSite.isEmpty() ) {
-                        QueryNode rootNode = modelQuery.getRootNode();
-                        if ( constructionNodesForSite.size() == 1 ) {
-                            rootNode = constructionNodesForSite.iterator().next();
-                        }
+                if ( domainTerm.isPresent() ) {
+                    noDomain = false;
+                    String siteLink = domainTerm.get();
+                    if ( !siteLink.equals( cachedSite ) ) {
+                        IntermediateQuery modelQuery = optionalMappingAssertion.get();
+                        final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery, useDefaultDomain );
+                        if ( !constructionNodesForSite.isEmpty() ) {
+                            QueryNode rootNode = modelQuery.getRootNode();
+                            if ( constructionNodesForSite.size() == 1 ) {
+                                rootNode = constructionNodesForSite.iterator().next();
+                            }
 
-                        DefaultTree root = new DefaultTree( rootNode ) {
-                        };
-                        QueryTreeComponent tree = new DefaultQueryTreeComponent( root ) {
-                            {
-                                if ( constructionNodesForSite.size() == 1 ) {
-                                    QueryNode join = modelQuery.getChildren( this.getRootNode() ).get( 0 );
-                                    this.addChild( this.getRootNode(), join, Optional.empty(), false );
-                                    for ( QueryNode ext : modelQuery.getChildren( join ) ) {
-                                        this.addChild( join, ext, Optional.empty(), false );
-                                    }
-                                } else {
-                                    for ( QueryNode constr : constructionNodesForSite ) {
-                                        this.addChild( this.getRootNode(), constr, Optional.empty(), false );
-                                        QueryNode join = modelQuery.getChildren( constr ).get( 0 );
-                                        this.addChild( constr, join, Optional.empty(), false );
+                            DefaultTree root = new DefaultTree( rootNode ) {
+                            };
+                            QueryTreeComponent tree = new DefaultQueryTreeComponent( root ) {
+                                {
+                                    if ( constructionNodesForSite.size() == 1 ) {
+                                        QueryNode join = modelQuery.getChildren( this.getRootNode() ).get( 0 );
+                                        this.addChild( this.getRootNode(), join, Optional.empty(), false );
                                         for ( QueryNode ext : modelQuery.getChildren( join ) ) {
                                             this.addChild( join, ext, Optional.empty(), false );
                                         }
+                                    } else {
+                                        for ( QueryNode constr : constructionNodesForSite ) {
+                                            this.addChild( this.getRootNode(), constr, Optional.empty(), false );
+                                            QueryNode join = modelQuery.getChildren( constr ).get( 0 );
+                                            this.addChild( constr, join, Optional.empty(), false );
+                                            for ( QueryNode ext : modelQuery.getChildren( join ) ) {
+                                                this.addChild( join, ext, Optional.empty(), false );
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        };
+                            };
 
-                        newQuery = new IntermediateQueryImpl(
-                                modelQuery.getDBMetadata(),
-                                modelQuery.getProjectionAtom(),
-                                tree,
-                                modelQuery.getExecutorRegistry(),
-                                null,
-                                new OntopModelSettings() {
-                                    @Override
-                                    public CardinalityPreservationMode getCardinalityPreservationMode() {
-                                        return null;
-                                    }
+                            newQuery = new IntermediateQueryImpl(
+                                    modelQuery.getDBMetadata(),
+                                    modelQuery.getProjectionAtom(),
+                                    tree,
+                                    modelQuery.getExecutorRegistry(),
+                                    null,
+                                    new OntopModelSettings() {
+                                        @Override
+                                        public CardinalityPreservationMode getCardinalityPreservationMode() {
+                                            return null;
+                                        }
 
-                                    public boolean isTestModeEnabled() {
-                                        return false;
-                                    }
+                                        public boolean isTestModeEnabled() {
+                                            return false;
+                                        }
 
-                                    @Override
-                                    public Optional<String> getProperty( String s ) {
-                                        return Optional.empty();
-                                    }
+                                        @Override
+                                        public Optional<String> getProperty( String s ) {
+                                            return Optional.empty();
+                                        }
 
-                                    @Override
-                                    public boolean contains( Object o ) {
-                                        return false;
-                                    }
-                                },
-                                modelQuery.getFactory()
+                                        @Override
+                                        public boolean contains( Object o ) {
+                                            return false;
+                                        }
+                                    },
+                                    modelQuery.getFactory()
 
-                        );
-                        cachedSite = siteLink;
+                            );
+                            cachedSite = siteLink;
+                        }
                     }
+                    optionalMappingAssertion = Optional.ofNullable( newQuery );
                 }
-                optionalMappingAssertion = Optional.ofNullable( newQuery );
-//                }
             }
 
             query = rootCnEnforcer.enforceRootCn( query );
