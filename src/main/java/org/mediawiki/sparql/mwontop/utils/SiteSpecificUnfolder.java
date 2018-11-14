@@ -29,8 +29,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 class SiteSpecificUnfolder implements QueryUnfolder {
+    private static final String DEFAULT_DOMAIN_FOR_QUERY = "https://en.wikipedia.org/wiki/mw{}ns:{}";
     private final Mapping mapping;
     private final RootConstructionNodeEnforcer rootCnEnforcer;
 
@@ -46,9 +48,11 @@ class SiteSpecificUnfolder implements QueryUnfolder {
         IntermediateQuery newQuery = null;
         String cachedSite = null;
 
+        boolean noDomain = true;
         Optional<IntensionalDataNode> optionalCurrentIntentionalNode = query.getIntensionalNodes().findFirst();
         while ( optionalCurrentIntentionalNode.isPresent() ) {
 
+            long leftNodesCount = query.getIntensionalNodes().count();
             IntensionalDataNode intentionalNode = optionalCurrentIntentionalNode.get();
 
             Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
@@ -62,11 +66,18 @@ class SiteSpecificUnfolder implements QueryUnfolder {
                         .filter( t -> t.contains( "/wiki/mw" ) )
                         .findFirst();
 
+                // we should define default domain at least for one node anyway, as we can't fetch data from over then 800 db's because of TimeoutException:
+                boolean useDefaultDomain = !domainTerm.isPresent() && ( leftNodesCount == 1 ) && noDomain;
+                if ( useDefaultDomain ) {
+                    domainTerm = Optional.of( DEFAULT_DOMAIN_FOR_QUERY );
+                }
+
                 if ( domainTerm.isPresent() ) {
+                    noDomain = false;
                     String siteLink = domainTerm.get();
                     if ( !siteLink.equals( cachedSite ) ) {
                         IntermediateQuery modelQuery = optionalMappingAssertion.get();
-                        final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery );
+                        final Set<QueryNode> constructionNodesForSite = getApplicableMappings( siteLink, modelQuery, useDefaultDomain );
                         if ( !constructionNodesForSite.isEmpty() ) {
                             QueryNode rootNode = modelQuery.getRootNode();
                             if ( constructionNodesForSite.size() == 1 ) {
@@ -142,25 +153,34 @@ class SiteSpecificUnfolder implements QueryUnfolder {
         return new TrueNodesRemovalOptimizer().optimize( query );
     }
 
+    /**
+     * @param onlyFirstNode in case of query without any domain links, we don't need all of the nodes for default one.
+     *                      So if this parameter is {@code true} we are fetching only the first node.
+     */
     @NonNull
-    private HashSet<QueryNode> getApplicableMappings( @NonNull String siteLink, @NonNull IntermediateQuery modelQuery ) {
+    private HashSet<QueryNode> getApplicableMappings( @NonNull String siteLink, @NonNull IntermediateQuery modelQuery, boolean onlyFirstNode ) {
         HashSet<QueryNode> constructionNodesForSidelines = new HashSet<>();
 
         ImmutableList<QueryNode> nodesInTopDownOrder = modelQuery.getNodesInTopDownOrder();
         if ( nodesInTopDownOrder != null ) {
-            nodesInTopDownOrder.stream()
+            Stream<ConstructionNodeImpl> constructionNodeStream = nodesInTopDownOrder.stream()
                     .filter( ConstructionNodeImpl.class::isInstance )
                     .map( ConstructionNodeImpl.class::cast )
                     .filter( node -> filterNode( node, siteLink ) )
-                    .filter( node -> modelQuery.getFirstChild( node ).isPresent() )
-                    .forEach( constructionNodesForSidelines::add );
+                    .filter( node -> modelQuery.getFirstChild( node ).isPresent() );
+
+            if ( onlyFirstNode ) {
+                constructionNodeStream = constructionNodeStream
+                        .limit( 1 );
+            }
+            constructionNodeStream.forEach( constructionNodesForSidelines::add );
         }
         return constructionNodesForSidelines;
     }
 
     private boolean filterNode( @NonNull ConstructionNodeImpl node, @NonNull String siteLink ) {
         ImmutableSubstitution<ImmutableTerm> substitution = node.getSubstitution();
-        if (substitution == null) {
+        if ( substitution == null ) {
             return false;
         }
         return substitution.getImmutableMap().values().stream()
