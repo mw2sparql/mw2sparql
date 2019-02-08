@@ -84,6 +84,7 @@ final class MWNamespace {
                     namespace = URLDecoder.decode(namespace, utfCharset );
                     pageTitle = URLDecoder.decode(pageTitle, utfCharset )
                             .replace("`", "%60")
+                            .replace("^", "%5E")
                             .replace("\"", "%22");
                 }
                 String baseUrl = m.group( 1 );
