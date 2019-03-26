@@ -19,7 +19,7 @@ jobs:
 
       - run:
           name: Set ssh
-          command: echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 8fLy4F9XDYdR/uHihWoPihKDhPaxCh0au/paSdGB7K8' >> ~/.ssh/known_hosts
+          command: echo '|1|MghqBH5tLsiX0M1LA/n4KuT3JX8=|xenAkjFgDOJGTn0y+w4/NQdIuZk= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFnJSjCGW7kli+cdgtmndPAl4xLZNc9uqP9KWlsnVDqr8yQ2RkR5ACbXe6XZ+dS09Wc9ulOmGTOwCImMi9Fho78=' >> ~/.ssh/known_hosts
 
       - run:
           name: Open tunnel to db
