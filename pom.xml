@@ -30,7 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ontopVersion>3.0.0-beta-2</ontopVersion>
         <activationVersion>1.1.1</activationVersion>
-        <jacksonVersion>2.9.5</jacksonVersion>
+        <jacksonVersion>2.9.8</jacksonVersion>
         <jdkVersion>1.8</jdkVersion>
         <jaxbVersion>2.3.0</jaxbVersion>
         <jerseyVersion>2.25.1</jerseyVersion>
