@@ -1,2 +1,5 @@
+.idea/
 target/
 config.properties
+dependency-reduced-pom.xml
+error.log
