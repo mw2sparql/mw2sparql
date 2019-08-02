@@ -65,7 +65,7 @@ public class Configuration {
      *
      * @see org.mediawiki.sparql.mwontop.sql.RepositoryFactory#initializeRepository
      */
-    public static final String APP_DB_FILTERED_WIKI_DB_NAMES_DEFAULT = "commonswiki, specieswiki";
+    public static final String APP_DB_FILTERED_WIKI_DB_NAMES_DEFAULT = "commonswiki, specieswiki, mediawikiwiki";
 
     @NonNull
     private Properties properties;
