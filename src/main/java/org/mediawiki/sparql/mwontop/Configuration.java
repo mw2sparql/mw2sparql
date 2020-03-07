@@ -59,7 +59,7 @@ public class Configuration {
      *
      * @see org.mediawiki.sparql.mwontop.sql.RepositoryFactory#initializeRepository
      */
-    public static final String APP_DB_FILTERED_WIKI_FAMILIES_DEFAULT = "wikimania, special, wikidata";
+    public static final String APP_DB_FILTERED_WIKI_FAMILIES_DEFAULT = "wikimania, special, wikidata, wikisource";
     /**
      * Default wiki db names to skip while processing site config.
      *
