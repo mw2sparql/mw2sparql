@@ -51,18 +51,18 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         assertTrue( result.contains( ">true<" ) );
     }
 
-    @Test
-    public void shouldResponseWithLinkAndCategoryRu() {
+//    @Test
+//    public void shouldResponseWithLinkAndCategoryRu() {
         //Reverse category lookup for ruwikisource-category
-        String query = encodeUrl( "SELECT * {?object ?predicate <https://ru.wikisource.org/wiki/Категория:ЕЭБЕ:Перенаправления>}" );
-        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
-        assertEquals( 200, response.getStatus() );
-        String result = response.readEntity( String.class );
-        String[] splitResult = result.split( System.lineSeparator() );
-        assertTrue( splitResult.length > 2 );
-        assertEqualsWithoutEOL( "object,predicate", splitResult[ 0 ] );
-        assertTrue( splitResult[ 1 ].contains( "ru.wikisource.org" ) );
-    }
+//        String query = encodeUrl( "SELECT * {?object ?predicate <https://ru.wikisource.org/wiki/Категория:ЕЭБЕ:Перенаправления>}" );
+//        Response response = target( "/sparql" ).queryParam( "query", baseQueryPartForGet + query ).request().get();
+//        assertEquals( 200, response.getStatus() );
+//        String result = response.readEntity( String.class );
+//        String[] splitResult = result.split( System.lineSeparator() );
+//        assertTrue( splitResult.length > 2 );
+//        assertEqualsWithoutEOL( "object,predicate", splitResult[ 0 ] );
+//        assertTrue( splitResult[ 1 ].contains( "ru.wikisource.org" ) );
+//    }
 
     @Test
     public void shouldResponseWithInnerLinksFr() {
