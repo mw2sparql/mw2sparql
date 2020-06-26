@@ -51,4 +51,4 @@ jobs:
       # Calls restart.sh on the remote server
       - deploy:
           name: Server restart
-          command: ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "become mw2sparql /data/project/mw2sparql/restart.sh"
+          command: ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "become mw2sparql webservice restart"
