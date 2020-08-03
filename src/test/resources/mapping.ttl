@@ -1,10 +1,10 @@
-@prefix rdf: <https://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <https://www.w3.org/2000/01/rdf-schema#> .
-@prefix owl: <https://www.w3.org/2002/07/owl#> .
-@prefix xsd: <https://www.w3.org/2001/XMLSchema#> .
-@prefix schema: <https://schema.org/> .
-@prefix mw: <https://mw2sparql.toolforge.org/ontology#> .
-@prefix rr: <https://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@prefix mw: <http://mw2sparql.toolforge.org/ontology#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
 
 
 # {base_url} is replaced before loading by the wiki base URL like "https://en.wikipedia.org"
