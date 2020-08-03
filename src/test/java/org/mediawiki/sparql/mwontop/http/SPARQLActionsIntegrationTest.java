@@ -19,11 +19,13 @@ import static org.junit.Assert.*;
  */
 public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
 
-    private final String baseQueryPartForGet = encodeUrl( "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> " +
+    private final String baseQueryPartForGet = encodeUrl("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX schema: <http://schema.org/> " +
             "PREFIX mw: <http://mw2sparql.toolforge.org/ontology#> " );
 
-    private final String baseQueryPartForPost = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> PREFIX mw: <http://tools.wmflabs" +
-            ".org/mw2sparql/ontology#> ";
+    private final String baseQueryPartForPost = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX schema: <http://schema.org/> " +
+            "PREFIX mw: <http://mw2sparql.toolforge.org/ontology#> ";
 
     @Override
     protected Application configure() {
@@ -125,7 +127,7 @@ public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
         String[] splitResult = result.split( System.lineSeparator() );
         assertEquals( 2, splitResult.length );
         assertEqualsWithoutEOL( "class", splitResult[ 0 ] );
-        assertEqualsWithoutEOL( "http://tools.wmflabs.org/mw2sparql/ontology#Page", splitResult[ 1 ] );
+        assertEqualsWithoutEOL( "http://mw2sparql.toolforge.org/ontology#Page", splitResult[ 1 ] );
     }
 
     @Test
