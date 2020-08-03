@@ -3,7 +3,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix schema: <http://schema.org/> .
-@prefix mw: <http://tools.wmflabs.org/mw2sparql/ontology#> .
+@prefix mw: <http://mw2sparql.toolforge.org/ontology#> .
 
 mw:Page a owl:Class .
 

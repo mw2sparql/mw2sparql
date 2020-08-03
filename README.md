@@ -1,7 +1,7 @@
 MW2SPARQL ![CircleCI](https://img.shields.io/circleci/build/github/mw2sparql/mw2sparql) ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m785457671-7a0e820bedfad3595188afb7)
 =========
 
-This repository contains the code of a [Wikimedia Tools Labs](https://tools.wmflabs.org) tool allowing to query [Wikimedia Wikis SQL database](https://www.mediawiki.org/wiki/Database) using SPARQL:
+This repository contains the code of a [Wikimedia Toolforge](https://toolforge.org) tool allowing to query [Wikimedia Wikis SQL database](https://www.mediawiki.org/wiki/Database) using SPARQL:
 * [User documentation](https://www.mediawiki.org/wiki/MW2SPARQL)
 * [Live endpoint](https://mw2sparql.toolforge.org/)
 * [K8s status](https://k8s-status.toolforge.org/namespaces/tool-mw2sparql/) 
