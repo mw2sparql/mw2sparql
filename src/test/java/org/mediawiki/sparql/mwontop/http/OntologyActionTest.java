@@ -38,7 +38,7 @@ public class OntologyActionTest extends JerseyTest {
     public void ontologyShouldResponseWithDifferentVariantsModels() throws IOException, URISyntaxException {
         Response response = target( "ontology" ).request("application/n-triples").get();
         assertEquals( 200, response.getStatus() );
-        assertTrue( response.readEntity( String.class ).contains( "<https://mw2sparql.toolforge.org/ontology#Page>" ) );
+        assertTrue( response.readEntity( String.class ).contains( "<http://mw2sparql.toolforge.org/ontology#Page>" ) );
 
         URI resource = getClass().getResource( "/ontology.ttl" ).toURI();
         String ontologyResourceContent = new String( Files.readAllBytes( Paths.get( resource ) ) );
