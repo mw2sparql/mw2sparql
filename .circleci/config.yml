@@ -19,11 +19,11 @@ jobs:
 
       - run:
           name: Set ssh
-          command: echo 'login.tools.wmflabs.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFnJSjCGW7kli+cdgtmndPAl4xLZNc9uqP9KWlsnVDqr8yQ2RkR5ACbXe6XZ+dS09Wc9ulOmGTOwCImMi9Fho78=' >> ~/.ssh/known_hosts
+          command: echo 'login.toolforge.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFnJSjCGW7kli+cdgtmndPAl4xLZNc9uqP9KWlsnVDqr8yQ2RkR5ACbXe6XZ+dS09Wc9ulOmGTOwCImMi9Fho78=' >> ~/.ssh/known_hosts
 
       - run:
           name: Open tunnel to db
-          command: ssh -f -v -N -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.tools.wmflabs.org
+          command: ssh -f -v -N -L 3306:s1.analytics.db.svc.eqiad.wmflabs:3306 ${DEPLOY_USER}@login.toolforge.org
 
       - checkout
 
@@ -45,10 +45,10 @@ jobs:
       - deploy:
           name: .jar upload
           command: |
-            ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "cp /data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar /data/project/mw2sparql/mwontop-${TARGET_VERSION}.old"
-            scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.tools.wmflabs.org:/data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar
+            ssh -v ${DEPLOY_USER}@login.toolforge.org "cp /data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar /data/project/mw2sparql/mwontop-${TARGET_VERSION}.old"
+            scp -r ~/repo/target/mwontop-${TARGET_VERSION}.jar ${DEPLOY_USER}@login.toolforge.org:/data/project/mw2sparql/mwontop-${TARGET_VERSION}.jar
 
       # Calls restart.sh on the remote server
       - deploy:
           name: Server restart
-          command: ssh -v ${DEPLOY_USER}@login.tools.wmflabs.org "become mw2sparql webservice restart"
+          command: ssh -v ${DEPLOY_USER}@login.toolforge.org "become mw2sparql webservice restart"
