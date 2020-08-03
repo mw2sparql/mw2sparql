@@ -19,10 +19,10 @@ import static org.junit.Assert.*;
  */
 public class SPARQLActionsIntegrationTest extends SparqlBaseTest {
 
-    private final String baseQueryPartForGet = encodeUrl( "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> " +
-            "PREFIX mw: <http://tools.wmflabs.org/mw2sparql/ontology#> " );
+    private final String baseQueryPartForGet = encodeUrl( "PREFIX rdf: <https://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> " +
+            "PREFIX mw: <https://mw2sparql.toolforge.org/ontology#> " );
 
-    private final String baseQueryPartForPost = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> PREFIX mw: <http://tools.wmflabs" +
+    private final String baseQueryPartForPost = "PREFIX rdf: <https://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX schema: <http://schema.org/> PREFIX mw: <http://tools.wmflabs" +
             ".org/mw2sparql/ontology#> ";
 
     @Override
